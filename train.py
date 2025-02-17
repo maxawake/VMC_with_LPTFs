@@ -33,9 +33,11 @@ if "--help" in sys.argv:
     print()
     helper(sys.argv)
 else:
-    print(sys.argv[1:])
+    # print(sys.argv[1:])
+    
+    args = ['--train', 'L=64', 'NLOOPS=16', 'K=1024', 'sub_directory=2x2', '--ptf', 'patch=2x2', '--rydberg', 'V=7', 'delta=1', 'Omega=1']
 
-    model,full_opt,opt_dict = build_model(sys.argv[1:])
+    model,full_opt,opt_dict = build_model(args)
     train_opt=opt_dict["TRAIN"]
 
     #Initialize optimizer
@@ -52,9 +54,10 @@ else:
 
     full_opt.save(mydir+"\\settings.json")
 
-    f = open(mydir+'\\output.txt', 'w')
-    sys.stdout = f
+    # f = open(mydir+'\\output.txt', 'w')
+    # sys.stdout = f
     try:
+        print("Starting Training...")
         reg_train(opt_dict,(model,optimizer),printf=True,mydir=mydir)
     except Exception as e:
         print(e)

@@ -137,8 +137,8 @@ def reg_train(op,net_optim=None,printf=False,mydir=None):
         return logp
     i=0
     t=time.time()
+    print("Start Training")
     for x in range(op.steps):
-        
         #gather samples and probabilities                
         if op.Q!=1:
             fill_batch()
@@ -147,7 +147,8 @@ def reg_train(op,net_optim=None,printf=False,mydir=None):
             if op.sgrad:
                 samplebatch,logp = net.sample(op.B,op.L)
             else:
-                with torch.no_grad():samplebatch,_= net.sample(op.B,op.L)
+                with torch.no_grad():
+                    samplebatch,_= net.sample(op.B,op.L)
                 #if you sample without gradients you have to recompute probabilities with gradients
                 logp=net.logprobability(samplebatch)
             
@@ -155,7 +156,8 @@ def reg_train(op,net_optim=None,printf=False,mydir=None):
                 sump_batch,sqrtp_batch = net.off_diag_labels_summed(samplebatch,nloops=op.NLOOPS)
             else:
                 #don't need gradients on the off diagonal when approximating gradients
-                 with torch.no_grad(): sump_batch,sqrtp_batch = net.off_diag_labels_summed(samplebatch,nloops=op.NLOOPS)
+                 with torch.no_grad(): 
+                     sump_batch,sqrtp_batch = net.off_diag_labels_summed(samplebatch,nloops=op.NLOOPS)
 
         #obtain energy
         with torch.no_grad():
@@ -189,9 +191,9 @@ def reg_train(op,net_optim=None,printf=False,mydir=None):
 
         debug += [[Eo.item(), Ev.item(), mag.item(), mag_v.item(), abs_mag.item(), abs_mag_v.item(), sq_mag.item(), sq_mag_v.item(), stag_mag.item(), stag_mag_v.item(), time.time()-t]]
 
-        if x%500==0:
-            print(int(time.time()-t),end=",%.3f|"%(losses[-1]))
-            if x%4000==0:print()
+        if x%10==0:
+            print(f"Step: {int(time.time()-t)}, Loss: {losses[-1]:.3f}")
+            if x%100==0:print()
             if printf:sys.stdout.flush()
     print(time.time()-t,x+1)
 

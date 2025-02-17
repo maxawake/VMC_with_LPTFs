@@ -91,13 +91,13 @@ def build_model(args):
         subsampler = SMODEL(**sub_opt.__dict__)
         #set lptf options
         #make lptf model and global settings
-        model = torch.jit.script(LPTF(subsampler,**lptf_opt.__dict__))
+        model = LPTF(subsampler,**lptf_opt.__dict__)
         full_opt = Options(train=train_opt.__dict__,model=lptf_opt.__dict__,
                            submodel=sub_opt.__dict__,hamiltonian=HAMILTONIAN.__dict__)
     else:
         #set model to submodel and create global settings
         full_opt = Options(train=train_opt.__dict__,model=sub_opt.__dict__,hamiltonian=HAMILTONIAN.__dict__)
-        model = torch.jit.script(SMODEL(**sub_opt.__dict__))
+        model = SMODEL(**sub_opt.__dict__)
         
     return model,full_opt,options_dict
 
