@@ -499,6 +499,3 @@ class PTF(Sampler):
         return probs
 
 OptionManager.register("ptf",PTF.DEFAULTS)
-    
-    
-spin
