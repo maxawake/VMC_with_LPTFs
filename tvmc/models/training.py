@@ -15,6 +15,7 @@ def hdf5_writer(queue, file_path):
                 break
             
             step, samplebatch = data  # Unpack data (step number, sample tensor)
+            print(samplebatch.shape)
             step_key = f"step_{step:05d}"  # Store each step under "step_00001", "step_00002", etc.
 
             f.create_dataset(step_key, data=samplebatch, dtype="uint8")

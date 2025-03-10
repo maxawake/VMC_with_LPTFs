@@ -62,7 +62,7 @@ else:
     except Exception as e:
         print(e)
         sys.stdout = orig_stdout
-        # f.close()
+        f.close()
         1/0
     sys.stdout = orig_stdout
-    # f.close()
+    f.close()
