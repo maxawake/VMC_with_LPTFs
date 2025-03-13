@@ -1,10 +1,15 @@
-from tvmc.hamiltonians.hamiltonian import *
-from tvmc.models.LPTF import *
-from tvmc.hamiltonians.rydberg import Rydberg
+import multiprocessing as mp
+import os
+import sys
+import time
+import torch
 
 import h5py
-import multiprocessing as mp
-import time
+
+from tvmc.hamiltonians.hamiltonian import *
+from tvmc.hamiltonians.rydberg import Rydberg
+from tvmc.models.LPTF import *
+
 
 # Define HDF5 writer process (Separate entry for each training step)
 def hdf5_writer(queue, file_path):
@@ -13,13 +18,13 @@ def hdf5_writer(queue, file_path):
             data = queue.get()
             if data is None:  # Stop signal
                 break
-            
+
             step, samplebatch = data  # Unpack data (step number, sample tensor)
             print(samplebatch.shape)
             step_key = f"step_{step:05d}"  # Store each step under "step_00001", "step_00002", etc.
 
             f.create_dataset(step_key, data=samplebatch, dtype="uint8")
-    
+
     print("HDF5 writer process finished.")
 
 
@@ -32,19 +37,6 @@ def new_rnn_with_optim(rnntype, op, beta1=0.9, beta2=0.999):
 def momentum_update(m, target_network, network):
     for target_param, param in zip(target_network.parameters(), network.parameters()):
         target_param.data.copy_(target_param.data * m + param.data * (1.0 - m))
-
-
-# Setting Constants
-
-import os
-
-
-def mkdir(dir_):
-    try:
-        os.mkdir(dir_)
-    except:
-        return -1
-    return 0
 
 
 def setup_dir(op_dict):
@@ -113,12 +105,20 @@ class TrainOpt(Options):
     """
 
     def get_defaults(self):
-        return dict(L=16, Q=1, K=256, B=256, NLOOPS=1, steps=50000, dir="out", lr=5e-4, seed=None, sgrad=False, true_grad=False, sub_directory="")
-
-
-OptionManager.register("train", TrainOpt())
-
-import sys
+        return dict(
+            L=16,
+            Q=1,
+            K=256,
+            B=256,
+            NLOOPS=1,
+            steps=50000,
+            dir="out",
+            lr=5e-4,
+            seed=None,
+            sgrad=False,
+            true_grad=False,
+            sub_directory="",
+        )
 
 
 def reg_train(op, net_optim=None, printf=False, mydir=None):
@@ -126,7 +126,7 @@ def reg_train(op, net_optim=None, printf=False, mydir=None):
         # Prepare queue for writing samples to disk
         sample_queue = mp.Queue()
         file_path = "samples.h5"
-        
+
         # Start writer process
         writer_process = mp.Process(target=hdf5_writer, args=(sample_queue, file_path))
         writer_process.start()
@@ -146,7 +146,7 @@ def reg_train(op, net_optim=None, printf=False, mydir=None):
         if op.true_grad:
             assert op.Q == 1
 
-        if type(net_optim) == type(None):
+        if net_optim is None:
             net, optimizer = new_rnn_with_optim("GRU", op)
         else:
             net, optimizer = net_optim
@@ -221,7 +221,7 @@ def reg_train(op, net_optim=None, printf=False, mydir=None):
 
             # Main loss curve to follow
             losses.append(ERR.cpu().item())
-            
+
             # Send samples to HDF5 writer asynchronously
             sample_queue.put((x, samplebatch.cpu().numpy()))
 
@@ -247,7 +247,7 @@ def reg_train(op, net_optim=None, printf=False, mydir=None):
             ]
 
             if x % 10 == 0:
-                print(f"Step: {int(time.time()-t)}, Loss: {losses[-1]:.3f}")
+                print(f"Step: {int(time.time() - t)}, Loss: {losses[-1]:.3f}")
                 if x % 100 == 0:
                     print()
                 if printf:
@@ -259,7 +259,7 @@ def reg_train(op, net_optim=None, printf=False, mydir=None):
         if op.dir != "<NONE>":
             np.save(mydir + "/DEBUG", DEBUG)
             net.save(mydir + "/T")
-            
+
         # Signal writer process to stop
         sample_queue.put(None)
         writer_process.join()
