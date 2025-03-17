@@ -43,16 +43,19 @@ if __name__ == "__main__":
         arg_helper(sys.argv)
     else:
         OptionManager.register("train", TrainOpt())
+        OptionManager.register("lptf", LPTF.DEFAULTS)
+        OptionManager.register("rnn", PRNN.DEFAULTS)
+        OptionManager.register("ptf", PTF.DEFAULTS)
         args = [
             "--train",
             "L=64",
             "NLOOPS=16",
             "K=1024",
             "sub_directory=2x2",
-            "--ptf",
-            "patch=2x2",
+            "--lptf",
+            #"patch=2x2",
             "--rydberg",
-            "V=7",
+            "V=1",
             "delta=1",
             "Omega=1",
         ]

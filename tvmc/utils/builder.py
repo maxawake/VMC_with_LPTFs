@@ -31,6 +31,7 @@ def build_model(args):
 
     options_dict = OptionManager.parse_cmd(args)
     is_lptf = "LPTF" in options_dict
+    print("is_lptf", is_lptf)
     all_models = dict(RNN=PRNN, LPTF=LPTF, PTF=PTF)
 
     if not "TRAIN" in options_dict:
