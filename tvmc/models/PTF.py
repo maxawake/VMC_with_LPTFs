@@ -3,7 +3,7 @@ import math
 import torch
 
 from tvmc.models.Base import Patch1D, Patch2D, Sampler, genpatch2onehot
-from tvmc.utils.options import OptionManager, Options
+from tvmc.utils.options import Options
 from tvmc.utils.cuda_helper import DEVICE
 
 ############################################Transformer Encoder Module############################################################
@@ -502,6 +502,3 @@ class PTF(Sampler):
             probs[:, N : (k + 1) * L // D] = logp
 
         return probs
-
-
-OptionManager.register("ptf", PTF.DEFAULTS)

@@ -2,7 +2,7 @@ import torch
 
 from tvmc.models.Base import Patch1D, Patch2D, Sampler
 from tvmc.models.PTF import PE1D, PE2D, FastMaskedTransformerEncoder
-from tvmc.utils.options import OptionManager, Options
+from tvmc.utils.options import Options
 from tvmc.utils.cuda_helper import DEVICE
 
 class LPTF(Sampler):
@@ -284,6 +284,3 @@ class LPTF(Sampler):
             probs[:, N : (k + 1) * L // D] = logp
 
         return probs
-
-
-OptionManager.register("lptf", LPTF.DEFAULTS)
