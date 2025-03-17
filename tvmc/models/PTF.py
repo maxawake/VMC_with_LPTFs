@@ -3,7 +3,6 @@ import math
 import torch
 
 from tvmc.models.Base import Patch1D, Patch2D, Sampler, genpatch2onehot
-from tvmc.utils.options import Options
 from tvmc.utils.cuda_helper import DEVICE
 
 ############################################Transformer Encoder Module############################################################
@@ -171,6 +170,7 @@ class PE1D(torch.nn.Module):
 
     def __init__(self, d_model, L, device, n_encode=None):
         super().__init__()
+        print(d_model)
         assert d_model % 4 == 0
         self.d_model = d_model
         # create constant 'pe' matrix with values dependent on
@@ -236,7 +236,6 @@ class PTF(Sampler):
         repeat_pre (bool)    -- repeat the precondition instead of projecting it out
     """
 
-    DEFAULTS = Options(L=16, patch=1, Nh=128, dropout=0.0, num_layers=2, nhead=8, repeat_pre=False)
 
     def __init__(self, L, patch, Nh, dropout, num_layers, nhead, repeat_pre, device=DEVICE, **kwargs):
         super(Sampler, self).__init__()
@@ -254,6 +253,7 @@ class PTF(Sampler):
             self.p = px * py
         else:
             p = int(patch)
+            print(Nh)
             self.pe = PE1D(Nh, L // p, device)
             self.patch = Patch1D(p, L)
             self.L = int(L // p)

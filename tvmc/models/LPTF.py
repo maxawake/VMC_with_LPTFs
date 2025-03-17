@@ -2,7 +2,6 @@ import torch
 
 from tvmc.models.Base import Patch1D, Patch2D, Sampler
 from tvmc.models.PTF import PE1D, PE2D, FastMaskedTransformerEncoder
-from tvmc.utils.options import Options
 from tvmc.utils.cuda_helper import DEVICE
 
 class LPTF(Sampler):
@@ -55,8 +54,6 @@ class LPTF(Sampler):
                                 by including --rnn or --ptf arguments.
     
     """
-    DEFAULTS = Options(L=64, patch=1, Nh=128, dropout=0.0, num_layers=2, nhead=8, full_seq=False)
-
     def __init__(self, subsampler, L, patch, Nh, dropout, num_layers, nhead, full_seq, device=DEVICE, **kwargs):
         super(Sampler, self).__init__()
 

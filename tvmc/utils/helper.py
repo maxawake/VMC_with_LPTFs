@@ -41,12 +41,12 @@ def setup_dir(op_dict):
     """
     op = op_dict["TRAIN"]
 
-    if op.dir == "<NONE>":
-        return
+    # if op.dir == "<NONE>":
+    #     return
 
-    hname = op_dict["HAMILTONIAN"].name if "HAMILTONIAN" in op_dict else "NA"
+    hname = op_dict["HAMILTONIAN"]["name"] if "HAMILTONIAN" in op_dict else "NA"
 
-    mydir = op.dir + "/%s/%d-B=%d-K=%d%s" % (hname, op.L, op.B, op.K, op.sub_directory)
+    mydir = op["dir"] + "/%s/%d-B=%d-K=%d%s" % (hname, op["L"], op["B"], op["K"], op["sub_directory"])
 
     os.makedirs(mydir, exist_ok=True)
     biggest = -1

@@ -1,7 +1,6 @@
 import torch
 
 from tvmc.models.Base import Patch1D, Patch2D, Sampler, genpatch2onehot
-from tvmc.utils.options import Options
 from tvmc.utils.cuda_helper import DEVICE
 
 class PRNN(Sampler):
@@ -31,8 +30,6 @@ class PRNN(Sampler):
         
         rnntype    (string)  -- Which type of RNN cell to use. Only ELMAN and GRU are valid options at the moment.
     """
-
-    DEFAULTS = Options(L=16, patch=1, rnntype="GRU", Nh=256)
     TYPES = {"GRU": torch.nn.GRU, "ELMAN": torch.nn.RNN, "LSTM": torch.nn.LSTM}
 
     def __init__(self, L, patch, rnntype, Nh, device=DEVICE, **kwargs):

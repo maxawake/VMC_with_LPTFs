@@ -2,13 +2,10 @@ import numpy as np
 import torch
 
 from tvmc.hamiltonians.hamiltonian import Hamiltonian
-from tvmc.utils.options import OptionManager, Options
 from tvmc.utils.cuda_helper import DEVICE
 
 
 class Rydberg(Hamiltonian):
-    DEFAULTS = Options(Lx=4, Ly=4, V=7.0, Omega=1.0, delta=1.0)
-
     def __init__(self, Lx, Ly, V, Omega, delta, device=DEVICE, **kwargs):
         self.Lx = Lx  # Size along x
         self.Ly = Ly  # Size along y
@@ -46,6 +43,3 @@ class Rydberg(Hamiltonian):
 
     def ground(self):
         return Rydberg.E[self.Lx * self.Ly]
-
-
-OptionManager.register("rydberg", Rydberg.DEFAULTS)
