@@ -5,7 +5,7 @@ import torch
 from tvmc.utils.builder import build_model
 from tvmc.utils.helper import setup_dir
 from tvmc.utils.training import reg_train
-from tvmc.utils.config import *
+from tvmc.utils.config import parse_config
 
 
 if __name__ == "__main__":
