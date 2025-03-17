@@ -2,8 +2,9 @@ import math
 
 import torch
 
-from tvmc.models.BaseModel import Patch1D, Patch2D, Sampler, genpatch2onehot
-from tvmc.util import OptionManager, Options
+from tvmc.models.Base import Patch1D, Patch2D, Sampler, genpatch2onehot
+from tvmc.utils.options import OptionManager, Options
+from tvmc.utils.cuda_helper import DEVICE
 
 ############################################Transformer Encoder Module############################################################
 
@@ -16,7 +17,7 @@ class FastMaskedTransformerEncoder(torch.nn.Module):
 
     """
 
-    def __init__(self, Nh=128, dropout=0.0, num_layers=2, nhead=8, device=device):
+    def __init__(self, Nh=128, dropout=0.0, num_layers=2, nhead=8, device=DEVICE):
         super(FastMaskedTransformerEncoder, self).__init__()
         # Encoder only transformer
         encoder_layer = torch.nn.TransformerEncoderLayer(d_model=Nh, nhead=nhead, dropout=dropout)
@@ -237,7 +238,7 @@ class PTF(Sampler):
 
     DEFAULTS = Options(L=16, patch=1, Nh=128, dropout=0.0, num_layers=2, nhead=8, repeat_pre=False)
 
-    def __init__(self, L, patch, Nh, dropout, num_layers, nhead, repeat_pre, device=device, **kwargs):
+    def __init__(self, L, patch, Nh, dropout, num_layers, nhead, repeat_pre, device=DEVICE, **kwargs):
         super(Sampler, self).__init__()
 
         if type(patch) == str and len(patch.split("x")) == 2:

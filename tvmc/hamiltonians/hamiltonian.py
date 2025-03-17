@@ -1,13 +1,10 @@
 import numpy as np
 import torch
 from torch import nn
-
-ngpu = 1
-device = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
-
+from tvmc.utils.cuda_helper import DEVICE
 
 class Hamiltonian:
-    def __init__(self, L, offDiag, device=device):
+    def __init__(self, L, offDiag, device=DEVICE):
         self.offDiag = offDiag  # Off-diagonal interaction
         self.L = L  # Number of spins
         self.device = device

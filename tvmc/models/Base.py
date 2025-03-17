@@ -1,12 +1,10 @@
 import torch
 from torch import nn
 
-ngpu = 1
-device = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
-
+from tvmc.utils.cuda_helper import DEVICE
 
 class Sampler(nn.Module):
-    def __init__(self, device=device):
+    def __init__(self, device=DEVICE):
         self.device = device
         super(Sampler, self).__init__()
 
@@ -84,7 +82,7 @@ class Sampler(nn.Module):
 
 # Functions for making Patches & doing probability traces
 class Patch2D(nn.Module):
-    def __init__(self, nx, ny, Lx, Ly, device=device):
+    def __init__(self, nx, ny, Lx, Ly, device=DEVICE):
         super().__init__()
         self.nx = nx
         self.ny = ny

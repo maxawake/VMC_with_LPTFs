@@ -7,8 +7,8 @@ from tvmc.hamiltonians.rydberg import Rydberg
 from tvmc.models.LPTF import LPTF
 from tvmc.models.PTF import PTF
 from tvmc.models.RNN import PRNN
-from tvmc.models.training import TrainOpt
-from tvmc.util import OptionManager, Options
+from tvmc.utils.training import TrainOpt
+from tvmc.utils.options import OptionManager, Options
 
 
 def build_model(args):

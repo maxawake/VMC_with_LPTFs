@@ -2,9 +2,9 @@ import sys
 
 import torch
 
-from tvmc.models.ModelBuilder import build_model
-from tvmc.models.training import OptionManager, TrainOpt, reg_train, setup_dir
-
+from tvmc.utils.builder import build_model
+from tvmc.utils.training import OptionManager, TrainOpt, reg_train
+from tvmc.utils.helper import setup_dir
 
 def helper(args):
     help(build_model)
@@ -36,6 +36,7 @@ if __name__ == "__main__":
         print()
         helper(sys.argv)
     else:
+        OptionManager.register("train", TrainOpt())
         args = [
             "--train",
             "L=64",
@@ -53,7 +54,7 @@ if __name__ == "__main__":
         model, full_opt, opt_dict = build_model(args)
         train_opt = opt_dict["TRAIN"]
 
-        OptionManager.register("train", TrainOpt())
+        
 
         # Initialize optimizer
         beta1 = 0.9

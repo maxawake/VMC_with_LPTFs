@@ -1,9 +1,9 @@
 import torch
 
-from tvmc.models.BaseModel import Patch1D, Patch2D, Sampler
+from tvmc.models.Base import Patch1D, Patch2D, Sampler
 from tvmc.models.PTF import PE1D, PE2D, FastMaskedTransformerEncoder
-from tvmc.util import OptionManager, Options
-
+from tvmc.utils.options import OptionManager, Options
+from tvmc.utils.cuda_helper import DEVICE
 
 class LPTF(Sampler):
     """
@@ -57,7 +57,7 @@ class LPTF(Sampler):
     """
     DEFAULTS = Options(L=64, patch=1, Nh=128, dropout=0.0, num_layers=2, nhead=8, full_seq=False)
 
-    def __init__(self, subsampler, L, patch, Nh, dropout, num_layers, nhead, full_seq, device=device, **kwargs):
+    def __init__(self, subsampler, L, patch, Nh, dropout, num_layers, nhead, full_seq, device=DEVICE, **kwargs):
         super(Sampler, self).__init__()
 
         if type(patch) == str and len(patch.split("x")) == 2:
@@ -77,7 +77,7 @@ class LPTF(Sampler):
             self.L = int(L // p)
             self.p = p
 
-        self.tokenize = nn.Sequential(nn.Linear(self.p, Nh), nn.Tanh())
+        self.tokenize = torch.nn.Sequential(torch.nn.Linear(self.p, Nh), torch.nn.Tanh())
 
         self.allh = full_seq
 
@@ -93,14 +93,13 @@ class LPTF(Sampler):
         self.to(device)
 
     def set_mask(self, L):
-        # type: (int)
         """Initialize the self-attention mask"""
         self.L = L
         self.transformer.set_mask(L)
         self.pe.L = L
 
     def logprobability(self, input):
-        # type: (Tensor) -> Tensor
+        # type: (Tensor) -> Tensor # type: ignore
         """Compute the logscale probability of a given state
         Inputs:
             input - [B,L,1] matrix of zeros and ones for ground/excited states
@@ -139,7 +138,7 @@ class LPTF(Sampler):
         return logp
 
     def sample(self, B, L, cache=None):
-        # type: (int,int,Optional[Tensor]) -> Tuple[Tensor,Tensor]
+        # type: (int,int,Optional[Tensor]) -> Tuple[Tensor,Tensor] # type: ignore
         """Generates a set states
         Inputs:
             B (int)            - The number of states to generate in parallel
@@ -178,7 +177,7 @@ class LPTF(Sampler):
         return self.patch.reverse(input.transpose(1, 0)).unsqueeze(-1), logp
 
     def off_diag_labels(self, sample, nloops=1):
-        # type: (Tensor,int) -> Tensor
+        # type: (Tensor,int) -> Tensor # type: ignore
         """label all of the flipped states  - set D as high as possible without it slowing down runtime
         Parameters:
             sample - [B,L,1] matrix of zeros and ones for ground/excited states

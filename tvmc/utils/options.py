@@ -124,8 +124,8 @@ class OptionManager:
             if arg[:2] == "--":
                 arg = arg.upper()
                 # make sure the name is registered
-                if arg[2:] not in OptionManager.registry:
-                    raise Exception("Argument %s Not Registered" % arg)
+                # if arg[2:] not in OptionManager.registry:
+                #     raise Exception("Argument %s Not Registered" % arg)
                 # copy the defaults and apply the new options
                 opt = OptionManager.registry[arg[2:]].copy()
                 opt.apply(sub_args)
