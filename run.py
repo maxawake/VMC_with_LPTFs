@@ -2,14 +2,19 @@ import sys
 
 import torch
 
+from tvmc.models.LPTF import LPTF
+from tvmc.models.PTF import PTF
+from tvmc.models.RNN import PRNN
 from tvmc.utils.builder import build_model
-from tvmc.utils.training import OptionManager, TrainOpt, reg_train
 from tvmc.utils.helper import setup_dir
+from tvmc.utils.options import OptionManager, TrainOpt
+from tvmc.utils.training import reg_train
 
-def helper(args):
+
+def arg_helper(args):
     help(build_model)
 
-    example = "Runtime Example:\n>>>python train.py --rydberg --train L=144"
+    example = "Runtime Example:\n>>>python run.py --rydberg --train L=144"
     while True:
         if "--lptf" in args:
             print(LPTF.INFO)
@@ -31,10 +36,11 @@ def helper(args):
         args = ["--" + input("What Model do you need help with?\nOptions are rnn, lptf, ptf, and train:\n".lower())]
 
 
+
 if __name__ == "__main__":
     if "--help" in sys.argv:
         print()
-        helper(sys.argv)
+        arg_helper(sys.argv)
     else:
         OptionManager.register("train", TrainOpt())
         args = [
@@ -53,8 +59,6 @@ if __name__ == "__main__":
 
         model, full_opt, opt_dict = build_model(args)
         train_opt = opt_dict["TRAIN"]
-
-        
 
         # Initialize optimizer
         beta1 = 0.9

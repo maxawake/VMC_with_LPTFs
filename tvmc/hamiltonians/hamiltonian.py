@@ -15,39 +15,12 @@ class Hamiltonian:
         """Creates the matrix representation of the on-diagonal part of the hamiltonian
         - This should fill Vij with values"""
         raise NotImplementedError
+    
+    def ground(self):
+        """Returns the ground state energy E/L"""
+        raise NotImplementedError
 
-    #    def localenergy(self,samples,logp,logppj):
-    #        """
-    #        Takes in s, ln[p(s)] and ln[p(s')] (for all s'), then computes Hloc(s) for N samples s.
-    #
-    #        Inputs:
-    #            samples - [B,L,1] matrix of zeros and ones for ground/excited states
-    #            logp - size B vector of logscale probabilities ln[p(s)]
-    #            logppj - [B,L] matrix of logscale probabilities ln[p(s')] where s'[i][j] had one state flipped at position j
-    #                    relative to s[i]
-    #        Returns:
-    #            size B vector of energies Hloc(s)
-    #
-    #        """
-    #        # Going to calculate Eloc for each sample in a separate spot
-    #        # so eloc will have shape [B]
-    #        # recall samples has shape [B,L,1]
-    #        B=samples.shape[0]
-    #        eloc = torch.zeros(B,device=self.device)
-    #        # Chemical potential
-    #        with torch.no_grad():
-    #            tmp=self.Vij(samples.squeeze(2))
-    #            eloc += torch.sum(tmp*samples.squeeze(2),axis=1)
-    #        # Off-diagonal part
-    #        #logppj is shape [B,L]
-    #        #logppj[:,j] has one state flipped at position j
-    #        for j in range(self.L):
-    #            #make sure torch.exp is a thing
-    #            eloc += self.offDiag * torch.exp((logppj[:,j]-logp)/2)
-    #
-    #        return eloc
-
-    def localenergyALT(self, samples, logp, sumsqrtp, logsqrtp):
+    def localenergy(self, samples, logp, sumsqrtp, logsqrtp):
         """
         Takes in s, ln[p(s)] and exp(-logsqrtp)*sum(sqrt[p(s')]), then computes Hloc(s) for N samples s.
 
@@ -100,6 +73,33 @@ class Hamiltonian:
 
         return mag, abs_mag, sq_mag, stag_mag / L
 
-    def ground(self):
-        """Returns the ground state energy E/L"""
-        raise NotImplementedError
+#    def localenergy(self,samples,logp,logppj):
+#        """
+#        Takes in s, ln[p(s)] and ln[p(s')] (for all s'), then computes Hloc(s) for N samples s.
+#
+#        Inputs:
+#            samples - [B,L,1] matrix of zeros and ones for ground/excited states
+#            logp - size B vector of logscale probabilities ln[p(s)]
+#            logppj - [B,L] matrix of logscale probabilities ln[p(s')] where s'[i][j] had one state flipped at position j
+#                    relative to s[i]
+#        Returns:
+#            size B vector of energies Hloc(s)
+#
+#        """
+#        # Going to calculate Eloc for each sample in a separate spot
+#        # so eloc will have shape [B]
+#        # recall samples has shape [B,L,1]
+#        B=samples.shape[0]
+#        eloc = torch.zeros(B,device=self.device)
+#        # Chemical potential
+#        with torch.no_grad():
+#            tmp=self.Vij(samples.squeeze(2))
+#            eloc += torch.sum(tmp*samples.squeeze(2),axis=1)
+#        # Off-diagonal part
+#        #logppj is shape [B,L]
+#        #logppj[:,j] has one state flipped at position j
+#        for j in range(self.L):
+#            #make sure torch.exp is a thing
+#            eloc += self.offDiag * torch.exp((logppj[:,j]-logp)/2)
+#
+#        return eloc

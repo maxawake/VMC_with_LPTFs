@@ -7,8 +7,7 @@ from tvmc.hamiltonians.rydberg import Rydberg
 from tvmc.models.LPTF import LPTF
 from tvmc.models.PTF import PTF
 from tvmc.models.RNN import PRNN
-from tvmc.utils.training import TrainOpt
-from tvmc.utils.options import OptionManager, Options
+from tvmc.utils.options import OptionManager, Options, TrainOpt
 
 
 def build_model(args):
@@ -17,16 +16,16 @@ def build_model(args):
 
     CMD arguments should look like this:
 
-    >>> python train.py --<param1> <name11>=<value11> <name12>=<value12> --<param2> <name21>=<value21> <name22>=<value22> . . .
+    >>> python run.py --<param1> <name11>=<value11> <name12>=<value12> --<param2> <name21>=<value21> <name22>=<value22> . . .
 
     Ex: A Patched Transformer with 2x2 patches, system total size of 8x8, a batch size of K*Q=1024 and 16 loops when calculating
         the off diagonal probabilities to save on memory:
 
-    >>> python train.py --train L=64 NLOOPS=16 K=1024 sub_directory=2x2 --ptf patch=2x2
+    >>> python run.py --train L=64 NLOOPS=16 K=1024 sub_directory=2x2 --ptf patch=2x2
 
     Ex2: A Large Patched Transformer using an RNN subsampler with 3x3 patches on the LPTF and 1D patches of size 3 on the RNN
 
-    >>> python train.py --rydberg --train L=576 NLOOPS=64 sub_directory=3x3 --lptf patch=3x3 --rnn L=9 patch=3 Nh=128
+    >>> python run.py --rydberg --train L=576 NLOOPS=64 sub_directory=3x3 --lptf patch=3x3 --rnn L=9 patch=3 Nh=128
 
     """
 

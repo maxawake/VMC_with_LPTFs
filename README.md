@@ -18,12 +18,12 @@ pip install -r requirements.txt
 This script is used to train new models from scratch. This is an example of a command
 to train an $8\times 8$ Rydberg lattice with $V=7$, $\delta=\Omega=1$ with a $2\times 2$ patched transformer:
 ```
-python train.py --train L=64 NLOOPS=16 K=1024 sub_directory=2x2 --ptf patch=2x2 --rydberg V=7 delta=1 Omega=1
+python run.py --train L=64 NLOOPS=16 K=1024 sub_directory=2x2 --ptf patch=2x2 --rydberg V=7 delta=1 Omega=1
 ```
 Training parameters are shown when running:
 
 ```
-python train.py --help --train
+python run.py --help --train
 ```
 
 These are all possible training arguments:
@@ -64,7 +64,7 @@ These are all possible training arguments:
 All optional rnn parameters can be viewed by running 
 
 ```
-python train.py --help --rnn
+python run.py --help --rnn
 ```
 
 These are the RNN parameters:
@@ -93,7 +93,7 @@ These are the RNN parameters:
 All optional ptf parameters can be viewed by running 
 
 ```
-python train.py --help --ptf
+python run.py --help --ptf
 ```
 
 These are your PTF parameters:
@@ -126,7 +126,7 @@ These are your PTF parameters:
 All optional LPTF parameters can be viewed by running 
 
 ```
-python train.py --help --lptf
+python run.py --help --lptf
 ```
 LPTF parameters must be followed by the sub-model (e.g. --rnn) and the corresponding parameters, where the L parameter needs to match the patch parameter of the LPTF (e.g. --lptf path=2x3 --rnn L=2x3).
 

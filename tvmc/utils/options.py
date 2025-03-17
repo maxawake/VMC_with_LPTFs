@@ -136,3 +136,52 @@ class OptionManager:
             else:
                 sub_args += [arg]
         return output
+
+class TrainOpt(Options):
+    """
+    Training Arguments:
+
+        L          (int)     -- Total lattice size (8x8 would be L=64).
+
+        Q          (int)     -- Number of minibatches per batch.
+
+        K          (int)     -- size of each minibatch.
+
+        B          (int)     -- Total batch size (should be Q*K).
+
+        NLOOPS     (int)     -- Number of loops within the off_diag_labels function. Higher values save ram and
+                                generally makes the code run faster (up to 2x). Note, you can only set this
+                                as high as your effective sequence length. (Take L and divide by your patch size).
+
+        steps      (int)     -- Number of training steps.
+
+        dir        (str)     -- Output directory, set to <NONE> for no output.
+
+        lr         (float)   -- Learning rate.
+
+        seed       (int)     -- Random seed for the run.
+
+        sgrad      (bool)    -- Whether or not to sample with gradients, otherwise create gradients in extra network run.
+                                (Uses less ram when but slightly slower)
+
+        true_grad  (bool)    -- Set to false to approximate the gradients, more efficient but approximate.
+
+        sub_directory (str)  -- String to add to the end of the output directory (inside a subfolder).
+
+    """
+
+    def get_defaults(self):
+        return dict(
+            L=16,
+            Q=1,
+            K=256,
+            B=256,
+            NLOOPS=1,
+            steps=50000,
+            dir="out",
+            lr=5e-4,
+            seed=None,
+            sgrad=False,
+            true_grad=False,
+            sub_directory="",
+        )

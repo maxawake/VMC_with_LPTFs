@@ -4,6 +4,7 @@ import os
 
 from tvmc.models.RNN import PRNN
 
+
 # Define HDF5 writer process (Separate entry for each training step)
 def hdf5_writer(queue, file_path):
     with h5py.File(file_path, "w") as f:
