@@ -1,16 +1,16 @@
 {
     "TRAIN": {
-        "L": 16,
+        "L": 64,
         "Q": 1,
-        "K": 256,
+        "K": 1024,
         "B": 256,
-        "NLOOPS": 1,
+        "NLOOPS": 16,
         "steps": 50000,
         "dir": "out",
         "lr": 5e-4,
         "sgrad": false,
         "true_grad": false,
-        "sub_directory": "",
+        "sub_directory": "2x2",
         "seed": null,
         "model": "LPTF"
     },
@@ -21,16 +21,16 @@
     },
     "PTF": {
         "Nh": 128,
-        "patch": 1,
+        "patch": "2x2",
         "dropout": 0.0,
         "num_layers": 2,
         "nhead": 8,
         "repeat_pre": false
     },
     "LPTF": {
-        "subsampler": "rnn",
+        "subsampler": "PTF",
         "Nh": 128,
-        "patch": 1,
+        "patch": "8x8",
         "dropout": 0.0,
         "num_layers": 2,
         "nhead": 8,
@@ -42,6 +42,6 @@
         "Ly": 4,
         "V": 7.0,
         "Omega": 1.0,
-        "delta": 2.0
+        "delta": 1.0
     }
 }
