@@ -15,11 +15,13 @@
         "model": "LPTF"
     },
     "RNN": {
+        "L": 64,
         "Nh": 256,
         "patch": 1,
         "rnntype": "GRU"
     },
     "PTF": {
+        "L": 64,
         "Nh": 128,
         "patch": "2x2",
         "dropout": 0.0,
@@ -28,6 +30,7 @@
         "repeat_pre": false
     },
     "LPTF": {
+        "L": 64,
         "subsampler": "PTF",
         "Nh": 128,
         "patch": "8x8",

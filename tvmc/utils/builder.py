@@ -42,10 +42,10 @@ def build_model(config):
 
         # Build subsampler
         if sub_name == "RNN":
-            submodel = PRNN(L, sub_cfg["patch"], sub_cfg["rnntype"], Nh)
+            submodel = PRNN(sub_cfg["L"], sub_cfg["patch"], sub_cfg["rnntype"], Nh)
         elif sub_name == "PTF":
             submodel = PTF(
-                L,
+                sub_cfg["L"],
                 sub_cfg["patch"],
                 Nh,
                 sub_cfg["dropout"],
@@ -59,7 +59,7 @@ def build_model(config):
         # Build LPTF
         model = LPTF(
             submodel,
-            L,
+            lptf_cfg["L"],
             lptf_cfg["patch"],
             lptf_cfg["Nh"],
             lptf_cfg["dropout"],
@@ -72,7 +72,7 @@ def build_model(config):
         model_cfg = config[model_type]
         if model_type == "PTF":
             model = PTF(
-                L,
+                model_cfg["L"],
                 model_cfg["patch"],
                 model_cfg["Nh"],
                 model_cfg["dropout"],
@@ -81,7 +81,7 @@ def build_model(config):
                 model_cfg["repeat_pre"],
             )
         elif model_type == "RNN":
-            model = PRNN(L, model_cfg["patch"], model_cfg["rnntype"], model_cfg["Nh"])
+            model = PRNN(model_cfg["L"], model_cfg["patch"], model_cfg["rnntype"], model_cfg["Nh"])
         else:
             raise ValueError(f"Unknown model type: {model_type}")
         
