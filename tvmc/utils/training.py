@@ -131,12 +131,11 @@ def reg_train(op, net_optim=None, printf=False, mydir=None):
             ]
 
             if x % 10 == 0:
-                print(f"Step: {int(time.time() - t)}, Loss: {losses[-1]:.3f}")
+                print(f"Step: {x}, Loss: {losses[-1]:.3f}")
                 if x % 100 == 0:
                     print()
                 if printf:
                     sys.stdout.flush()
-        print(time.time() - t, x + 1)
 
         DEBUG = np.array(debug)
 

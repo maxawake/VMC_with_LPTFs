@@ -262,7 +262,7 @@ class PTF(Sampler):
         if type(Nh) is int:
             Nh = [Nh] * 4
         else:
-            Nh += [self.L * Nh[0]] if _2D else [self.L * Nh[0]]
+            Nh += [self.L * Nh[0]]# if _2D else [self.L * Nh[0]]
 
         self.device = device
 

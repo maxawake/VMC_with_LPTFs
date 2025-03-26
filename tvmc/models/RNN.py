@@ -57,6 +57,7 @@ class PRNN(Sampler):
         self.rnntype = rnntype
 
         # create a tensor of all possible patches
+        print(self.device)
         self.options = torch.zeros([1 << self.p, self.p], device=self.device)
         tmp = torch.arange(1 << self.p, device=self.device)
         for i in range(self.p):

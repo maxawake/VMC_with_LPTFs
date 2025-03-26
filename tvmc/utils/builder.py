@@ -1,113 +1,90 @@
 from tvmc.models.PTF import PTF
-
+from tvmc.models.RNN import PRNN
+from tvmc.models.LPTF import LPTF
+import torch
+import random
+import numpy as np
 
 def build_model(config):
-    """
-    Builds a Sampler network using command line arguments
+    # === TRAIN CONFIG ===
+    train_cfg = config["TRAIN"]
+    L = train_cfg["L"]
+    seed = train_cfg.get("seed") or np.random.randint(65536)
 
-    CMD arguments should look like this:
+    # Set seeds
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    train_cfg["seed"] = seed
 
-    >>> python run.py --<param1> <name11>=<value11> <name12>=<value12> --<param2> <name21>=<value21> <name22>=<value22> . . .
+    # Ensure batch size
+    train_cfg["B"] = train_cfg["K"] * train_cfg["Q"]
 
-    Ex: A Patched Transformer with 2x2 patches, system total size of 8x8, a batch size of K*Q=1024 and 16 loops when calculating
-        the off diagonal probabilities to save on memory:
+    # === HAMILTONIAN CONFIG ===
+    if config["HAMILTONIAN"].get("name") == "Rydberg":
+        if config["HAMILTONIAN"].get("Lx", 0) * config["HAMILTONIAN"].get("Ly", 0) != L:
+            config["HAMILTONIAN"]["Lx"] = config["HAMILTONIAN"]["Ly"] = int(L**0.5)
 
-    >>> python run.py --train L=64 NLOOPS=16 K=1024 sub_directory=2x2 --ptf patch=2x2
+    # === MODEL SELECTION ===
+    model_type = train_cfg.get("model", "PTF")
 
-    Ex2: A Large Patched Transformer using an RNN subsampler with 3x3 patches on the LPTF and 1D patches of size 3 on the RNN
+    if model_type == "LPTF":
+        # Subsampler model name (e.g., "rnn" → "RNN")
+        sub_name = config["LPTF"].get("subsampler", "rnn").upper()
+        sub_cfg = config.get(sub_name, {})
+        lptf_cfg = config["LPTF"]
 
-    >>> python run.py --rydberg --train L=576 NLOOPS=64 sub_directory=3x3 --lptf patch=3x3 --rnn L=9 patch=3 Nh=128
+        # Set hidden size(s)
+        if sub_name == "PTF":
+            Nh = [sub_cfg["Nh"], lptf_cfg["Nh"]]
+        else:
+            Nh = lptf_cfg["Nh"]
 
-    """
+        # Build subsampler
+        if sub_name == "RNN":
+            submodel = PRNN(L, sub_cfg["patch"], sub_cfg["rnntype"], Nh)
+        elif sub_name == "PTF":
+            submodel = PTF(
+                L,
+                sub_cfg["patch"],
+                Nh,
+                sub_cfg["dropout"],
+                sub_cfg["num_layers"],
+                sub_cfg["nhead"],
+                sub_cfg["repeat_pre"],
+            )
+        else:
+            raise ValueError(f"Unknown subsampler: {sub_name}")
 
-    # options_dict = config#OptionManager.parse_cmd(args)
-    # print("options_dict", options_dict)
-    # is_lptf = "LPTF" in options_dict
-    # print("is_lptf", is_lptf)
-    # all_models = dict(RNN=PRNN, LPTF=LPTF, PTF=PTF)
+        # Build LPTF
+        model = LPTF(
+            submodel,
+            L,
+            lptf_cfg["patch"],
+            lptf_cfg["Nh"],
+            lptf_cfg["dropout"],
+            lptf_cfg["num_layers"],
+            lptf_cfg["nhead"],
+            lptf_cfg["full_seq"]
+        )
 
-    # if not "TRAIN" in options_dict:
-    #     options_dict["TRAIN"] = None
-    #     for name in options_dict:
-    #         if name in all_models and (not is_lptf or name == "LPTF"):
-    #             options_dict["TRAIN"] = TrainOpt(L=options_dict[name].L)
-
-    # if options_dict["TRAIN"]["seed"] is None:
-    #     options_dict["TRAIN"]["seed"] = np.random.randint(65536)
-
-    # torch.manual_seed(options_dict["TRAIN"]["seed"])
-    # np.random.seed(options_dict["TRAIN"]["seed"])
-    # random.seed(options_dict["TRAIN"]["seed"])
-
-    # HAMILTONIAN = None
-    # for name in options_dict:
-    #     # make sure system size is consistent among all options
-    #     if name == "LPTF" or is_lptf == False:
-    #         options_dict[name].L = options_dict["TRAIN"].L
-    #         if options_dict["TRAIN"].dir == "out" and name in all_models:
-    #             options_dict["TRAIN"].dir = name
-    #     # make sure hamiltonians have correct system size
-    #     if not name in all_models and name != "TRAIN":
-    #         options_dict[name].L = options_dict["TRAIN"].L
-    #         HAMILTONIAN = options_dict[name]
-    #         options_dict[name].name = name
-    #         if name == "RYDBERG":
-    #             h = options_dict[name]
-    #             if h.Lx * h.Ly != h.L:
-    #                 h.Lx = h.Ly = int(h.L**0.5)
-    #     # set model type
-    #     # if name in all_models:
-    #     #     options_dict[name].model_name = all_models[name].__name__
-    #     #     if not is_lptf or name != "LPTF":
-                
-    #     SMODEL, sub_opt = all_models[name], options_dict[name]
-
-    # # Special case for no hamiltonian specified
-    # if HAMILTONIAN is None:
-    #     HAMILTONIAN = h = Rydberg.DEFAULTS.copy()
-    #     h.L = options_dict["TRAIN"].L
-    #     if h.Lx * h.Ly != h.L:
-    #         h.Lx = h.Ly = int(h.L**0.5)
-
-    # options_dict["HAMILTONIAN"] = HAMILTONIAN
-
-    # # Make sure batch size makes sense
-    # train_opt = options_dict["TRAIN"]
-    # train_opt.B = train_opt.K * train_opt.Q
-
-    # # Build models
-    # # for the lptf we need to have a model and submodel
-    # if is_lptf:
-    #     lptf_opt = options_dict["LPTF"]
-    #     # extra condition on the PTF to make the conditioned sampling work
-    #     if SMODEL == PTF:
-    #         sub_opt.Nh = [sub_opt.Nh, lptf_opt.Nh]
-    #     else:
-    #         sub_opt.Nh = lptf_opt.Nh
-
-    #     subsampler = SMODEL(**sub_opt.__dict__)
-    #     # set lptf options
-    #     # make lptf model and global settings
-    #     model = LPTF(subsampler, **lptf_opt.__dict__)
-    #     full_opt = Options(
-    #         train=train_opt.__dict__,
-    #         model=lptf_opt.__dict__,
-    #         submodel=sub_opt.__dict__,
-    #         hamiltonian=HAMILTONIAN.__dict__,
-    #     )
-    # else:
-    #     # set model to submodel and create global settings
-    #     full_opt = Options(train=train_opt.__dict__, model=sub_opt.__dict__, hamiltonian=HAMILTONIAN.__dict__)
-    #     model = SMODEL(**sub_opt.__dict__)
-    L = config["TRAIN"]["L"]
-    Nh = config["PTF"]["Nh"]
-    patch = config["PTF"]["patch"]
-    dropout = config["PTF"]["dropout"]
-    num_layers = config["PTF"]["num_layers"]
-    nhead = config["PTF"]["nhead"]
-    repeat_pre = config["PTF"]["repeat_pre"]    
-    
-    
-    model = PTF(L, patch, Nh, dropout, num_layers, nhead, repeat_pre)
+    else:
+        model_cfg = config[model_type]
+        if model_type == "PTF":
+            model = PTF(
+                L,
+                model_cfg["patch"],
+                model_cfg["Nh"],
+                model_cfg["dropout"],
+                model_cfg["num_layers"],
+                model_cfg["nhead"],
+                model_cfg["repeat_pre"],
+            )
+        elif model_type == "RNN":
+            model = PRNN(L, model_cfg["patch"], model_cfg["rnntype"], model_cfg["Nh"])
+        else:
+            raise ValueError(f"Unknown model type: {model_type}")
+        
+    config["TRAIN"] = train_cfg
 
     return model, config
