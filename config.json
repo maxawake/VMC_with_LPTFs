@@ -3,7 +3,6 @@
         "L": 64,
         "Q": 1,
         "K": 1024,
-        "B": 256,
         "NLOOPS": 16,
         "steps": 50000,
         "dir": "out",
@@ -31,7 +30,7 @@
     },
     "LPTF": {
         "L": 64,
-        "subsampler": "PTF",
+        "subsampler": "RNN",
         "Nh": 128,
         "patch": "8x8",
         "dropout": 0.0,
@@ -41,8 +40,6 @@
     },
     "HAMILTONIAN": {
         "name": "Rydberg",
-        "Lx": 4,
-        "Ly": 4,
         "V": 7.0,
         "Omega": 1.0,
         "delta": 1.0
