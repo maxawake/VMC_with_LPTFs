@@ -2,3 +2,4 @@
 /RNN
 **/__pycache__
 *.h5
+/out
