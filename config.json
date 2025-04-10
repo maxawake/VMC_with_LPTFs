@@ -1,7 +1,7 @@
 {
     "TRAIN": {
         "L": 64,
-        "Q": 1,
+        "Q": 2,
         "K": 256,
         "NLOOPS": 16,
         "steps": 20000,
@@ -14,7 +14,7 @@
         "model": "LPTF"
     },
     "RNN": {
-        "L": 64,
+        "L": 8,
         "Nh": 128,
         "patch": "2x2",
         "rnntype": "GRU"
