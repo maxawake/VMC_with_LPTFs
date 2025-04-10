@@ -37,7 +37,7 @@ def setup_dir(op_dict):
     Inputs:
         op_dict (dict) - Dictionary of Options objects
     Outputs:
-        Output directory mydir
+        Output directory output_path
     """
     op = op_dict["TRAIN"]
 
@@ -46,19 +46,19 @@ def setup_dir(op_dict):
 
     hname = op_dict["HAMILTONIAN"]["name"] if "HAMILTONIAN" in op_dict else "NA"
 
-    mydir = op["dir"] + "/%s/%d-B=%d-K=%d%s" % (hname, op["L"], op["B"], op["K"], op["sub_directory"])
+    output_path = op["dir"] + "/%s/%d-B=%d-K=%d%s" % (hname, op["L"], op["B"], op["K"], op["sub_directory"])
 
-    os.makedirs(mydir, exist_ok=True)
+    os.makedirs(output_path, exist_ok=True)
     biggest = -1
-    for paths, folders, files in os.walk(mydir):
+    for paths, folders, files in os.walk(output_path):
         for f in folders:
             try:
                 biggest = max(biggest, int(f))
             except:
                 pass
 
-    mydir += "/" + str(biggest + 1)
-    os.makedirs(mydir, exist_ok=True)
+    output_path += "/" + str(biggest + 1)
+    os.makedirs(output_path, exist_ok=True)
 
     print("Output folder path established")
-    return mydir
+    return output_path

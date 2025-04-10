@@ -1,7 +1,7 @@
 import multiprocessing as mp
 import sys
 import time
-
+import os
 import numpy as np
 import torch
 
@@ -10,20 +10,20 @@ from tvmc.utils.cuda_helper import DEVICE
 from tvmc.utils.helper import hdf5_writer, new_rnn_with_optim, setup_dir
 
 
-def reg_train(op, net_optim=None, printf=False, mydir=None):
+def reg_train(op, net_optim=None, printf=False, output_path=None):
     try:
+        h = Rydberg(**op["HAMILTONIAN"])
+
+        if output_path is None:
+            output_path = setup_dir(op)
+
         # Prepare queue for writing samples to disk
         sample_queue = mp.Queue()
-        file_path = "samples.h5"
+        file_path = os.path.join(output_path, "samples.h5")
 
         # Start writer process
         writer_process = mp.Process(target=hdf5_writer, args=(sample_queue, file_path))
         writer_process.start()
-
-        h = Rydberg(**op["HAMILTONIAN"])
-
-        if mydir == None:
-            mydir = setup_dir(op)
 
         op = op["TRAIN"]
 
@@ -139,19 +139,20 @@ def reg_train(op, net_optim=None, printf=False, mydir=None):
 
         DEBUG = np.array(debug)
 
-        if op.dir != "<NONE>":
-            np.save(mydir + "/DEBUG", DEBUG)
-            net.save(mydir + "/T")
+        if op["dir"] is not None:
+            np.save(output_path + "/DEBUG", DEBUG)
+            net.save(output_path + "/T")
 
         # Signal writer process to stop
         sample_queue.put(None)
         writer_process.join()
 
+
     except KeyboardInterrupt:
         sample_queue.put(None)
         writer_process.join()
-        if op.dir != "<NONE>":
+        if op["dir"] is not None:
             DEBUG = np.array(debug)
-            np.save(mydir + "/DEBUG", DEBUG)
-            net.save(mydir + "/T")
+            np.save(output_path + "/DEBUG", DEBUG)
+            net.save(output_path + "/T")
     return DEBUG
