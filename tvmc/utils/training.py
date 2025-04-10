@@ -44,7 +44,6 @@ def reg_train(op, net_optim=None, printf=False, output_path=None):
 
         debug = []
         losses = []
-        true_energies = []
 
         # samples
         samplebatch = torch.zeros([op["B"], op["L"], 1], device=DEVICE)
@@ -64,10 +63,9 @@ def reg_train(op, net_optim=None, printf=False, output_path=None):
                     sqrtp_batch[i * op["K"] : (i + 1) * op["K"]] = sqrtp
             return logp
 
-        i = 0
         t = time.time()
         print("Start Training")
-        for x in range(op["steps"]):
+        for step in range(op["steps"]):
             # gather samples and probabilities
             if op["Q"] != 1:
                 fill_batch()
@@ -114,7 +112,7 @@ def reg_train(op, net_optim=None, printf=False, output_path=None):
             losses.append(ERR.cpu().item())
 
             # Send samples to HDF5 writer asynchronously
-            sample_queue.put((x, samplebatch.cpu().numpy()))
+            sample_queue.put((step, samplebatch.cpu().numpy()))
 
             # update weights
             net.zero_grad()
@@ -137,9 +135,9 @@ def reg_train(op, net_optim=None, printf=False, output_path=None):
                 ]
             ]
 
-            if x % 10 == 0:
-                print(f"Step: {x}, Loss: {losses[-1]:.3f}")
-                if x % 100 == 0:
+            if step % 10 == 0:
+                print(f"Step: {step}, Loss: {losses[-1]:.3f}")
+                if step % 100 == 0:
                     print()
                 if printf:
                     sys.stdout.flush()

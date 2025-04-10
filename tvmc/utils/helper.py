@@ -54,7 +54,9 @@ def setup_dir(op_dict):
         for f in folders:
             try:
                 biggest = max(biggest, int(f))
-            except:
+            except Exception as e:
+                print("Error in folder naming, please check your folder structure")
+                print("Error: ", e)
                 pass
 
     output_path += "/" + str(biggest + 1)
