@@ -1,6 +1,6 @@
 {
     "TRAIN": {
-        "L": 64,
+        "L": 256,
         "Q": 2,
         "K": 256,
         "NLOOPS": 16,
@@ -29,7 +29,7 @@
         "repeat_pre": false
     },
     "LPTF": {
-        "L": 64,
+        "L": 256,
         "subsampler": "RNN",
         "Nh": 128,
         "patch": "2x2",
@@ -42,6 +42,6 @@
         "name": "Rydberg",
         "V": 3.0,
         "Omega": 1.0,
-        "delta": 1.0
+        "delta": 2.0
     }
 }
