@@ -6,13 +6,20 @@ import numpy as np
 import torch
 
 from tvmc.hamiltonians.rydberg import Rydberg
+from tvmc.hamiltonians.ising import Ising
 from tvmc.utils.cuda_helper import DEVICE
 from tvmc.utils.helper import hdf5_writer, new_rnn_with_optim, setup_dir
 
 
 def reg_train(op, net_optim=None, printf=False, output_path=None):
     try:
-        h = Rydberg(**op["HAMILTONIAN"])
+        print(op["HAMILTONIAN"])
+        if op["HAMILTONIAN"]["name"] == "Rydberg":
+            h = Rydberg(**op["HAMILTONIAN"])
+        elif op["HAMILTONIAN"]["name"] == "Ising":
+            h = Ising(**op["HAMILTONIAN"])
+        else:
+            raise ValueError("Hamiltonian not implemented")
 
         if output_path is None:
             output_path = setup_dir(op)

@@ -21,9 +21,9 @@ def build_model(config):
     train_cfg["B"] = train_cfg["K"] * train_cfg["Q"]
 
     # === HAMILTONIAN CONFIG ===
-    if config["HAMILTONIAN"].get("name") == "Rydberg":
-        if config["HAMILTONIAN"].get("Lx", 0) * config["HAMILTONIAN"].get("Ly", 0) != L:
-            config["HAMILTONIAN"]["Lx"] = config["HAMILTONIAN"]["Ly"] = int(L**0.5)
+    if config["HAMILTONIAN"]["name"] == "Rydberg" or config["HAMILTONIAN"]["name"] == "Ising":
+        config["HAMILTONIAN"]["Lx"] = config["HAMILTONIAN"]["Ly"] = int(L**0.5)
+        config["HAMILTONIAN"]["L"] = L
 
     # === MODEL SELECTION ===
     model_type = train_cfg.get("model", "PTF")
