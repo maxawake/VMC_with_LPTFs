@@ -2,9 +2,9 @@
     "TRAIN": {
         "L": 64,
         "Q": 1,
-        "K": 1024,
+        "K": 256,
         "NLOOPS": 16,
-        "steps": 50000,
+        "steps": 20000,
         "dir": "out",
         "lr": 5e-4,
         "sgrad": false,
@@ -15,8 +15,8 @@
     },
     "RNN": {
         "L": 64,
-        "Nh": 256,
-        "patch": 1,
+        "Nh": 128,
+        "patch": "2x2",
         "rnntype": "GRU"
     },
     "PTF": {
@@ -32,7 +32,7 @@
         "L": 64,
         "subsampler": "RNN",
         "Nh": 128,
-        "patch": "8x8",
+        "patch": "2x2",
         "dropout": 0.0,
         "num_layers": 2,
         "nhead": 8,
@@ -40,7 +40,7 @@
     },
     "HAMILTONIAN": {
         "name": "Rydberg",
-        "V": 7.0,
+        "V": 3.0,
         "Omega": 1.0,
         "delta": 1.0
     }
