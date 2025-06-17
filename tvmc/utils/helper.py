@@ -5,7 +5,6 @@ import os
 from tvmc.models.RNN import PRNN
 
 
-# Define HDF5 writer process (Separate entry for each training step)
 def hdf5_writer(queue, file_path):
     with h5py.File(file_path, "w") as f:
         while True:
@@ -13,10 +12,18 @@ def hdf5_writer(queue, file_path):
             if data is None:  # Stop signal
                 break
 
-            step, samplebatch = data  # Unpack data (step number, sample tensor)
-            step_key = f"step_{step:05d}"  # Store each step under "step_00001", "step_00002", etc.
+            step, samplebatch, debug_dict = data
+            step_key = f"step_{step:05d}"
 
-            f.create_dataset(step_key, data=samplebatch, dtype="uint8")
+            # Create a group per step
+            grp = f.create_group(step_key)
+
+            # Store sample
+            grp.create_dataset("sample", data=samplebatch, dtype="uint8")
+
+            # Store each debug value separately
+            for key, value in debug_dict.items():
+                grp.create_dataset(key, data=value)
 
     print("HDF5 writer process finished.")
 

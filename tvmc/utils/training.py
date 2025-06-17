@@ -121,8 +121,22 @@ def reg_train(op, net_optim=None, printf=False, output_path=None, resume=False):
             # Main loss curve to follow
             losses.append(ERR.cpu().item())
 
+            step_debug = {
+                "Eo": Eo.item(),
+                "Ev": Ev.item(),
+                "mag": mag.item(),
+                "mag_var": mag_v.item(),
+                "abs_mag": abs_mag.item(),
+                "abs_mag_var": abs_mag_v.item(),
+                "sq_mag": sq_mag.item(),
+                "sq_mag_var": sq_mag_v.item(),
+                "stag_mag": stag_mag.item(),
+                "stag_mag_var": stag_mag_v.item(),
+                "time": time.time() - t,
+            }
+
             # Send samples to HDF5 writer asynchronously
-            sample_queue.put((step, samplebatch.cpu().numpy()))
+            sample_queue.put((step, samplebatch.cpu().numpy(), step_debug))
 
             # update weights
             net.zero_grad()
