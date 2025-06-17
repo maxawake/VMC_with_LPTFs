@@ -21,14 +21,14 @@ def reg_train(op, net_optim=None, printf=False, output_path=None, resume=False):
         else:
             raise ValueError("Hamiltonian not implemented")
 
-        if output_path is None:
-            output_path = setup_dir(op)
-
+        # Set up output directory and checkpoint path
+        output_path = setup_dir(op, resume=resume)
         checkpoint_path = os.path.join(output_path, "checkpoint.pt")
         start_step = 0
 
         # Prepare queue for writing samples to disk
         sample_queue = mp.Queue()
+        print(output_path)
         file_path = os.path.join(output_path, "samples.h5")
 
         # Start writer process
@@ -147,12 +147,11 @@ def reg_train(op, net_optim=None, printf=False, output_path=None, resume=False):
 
             if step % 10 == 0:
                 print(f"Step: {step}, Loss: {losses[-1]:.3f}")
-                if step % 100 == 0:
-                    print("Save checkpoint...")
 
                 if printf:
                     sys.stdout.flush()
-
+            if step % 100 == 0:
+                print("Saving checkpoint...")
                 torch.save(
                     {
                         "step": step,

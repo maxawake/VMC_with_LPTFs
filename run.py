@@ -17,10 +17,8 @@ def run(config):
     beta2 = 0.999
     optimizer = torch.optim.Adam(model.parameters(), lr=config["TRAIN"]["lr"], betas=(beta1, beta2))
 
-    output_path = setup_dir(config)
-
     print("Starting Training...")
-    reg_train(config, (model, optimizer), printf=True, output_path=output_path, resume=True)
+    reg_train(config, (model, optimizer), printf=True, resume=True)
 
     # Clean up after each run
     del model

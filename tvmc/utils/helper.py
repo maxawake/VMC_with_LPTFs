@@ -32,7 +32,7 @@ def momentum_update(m, target_network, network):
         target_param.data.copy_(target_param.data * m + param.data * (1.0 - m))
 
 
-def setup_dir(op_dict):
+def setup_dir(op_dict, resume=False):
     """Makes directory for output and saves the run settings there
     Inputs:
         op_dict (dict) - Dictionary of Options objects
@@ -59,7 +59,12 @@ def setup_dir(op_dict):
                 print("Error: ", e)
                 pass
 
-    output_path += "/" + str(biggest + 1)
+    if resume:
+        number = str(biggest)
+    else:
+        number = str(biggest + 1)
+    output_path += "/" + number
+
     os.makedirs(output_path, exist_ok=True)
 
     print("Output folder path established")
