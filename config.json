@@ -4,7 +4,7 @@
         "Q": 2,
         "K": 256,
         "NLOOPS": 16,
-        "steps": 2000,
+        "steps": 20000,
         "dir": "output",
         "lr": 5e-4,
         "sgrad": false,
@@ -38,12 +38,12 @@
         "nhead": 8,
         "full_seq": false
     },
-    "HAMILTONIAN": {
+    "HAMILTONIAN_": {
         "name": "Ising",
         "h_x": 0.0,
         "J": 1.0
     },
-    "HAMILTONIAN_": {
+    "HAMILTONIAN": {
         "name": "Rydberg",
         "V": 3.0,
         "Omega": 1.0,
