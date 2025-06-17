@@ -1,6 +1,7 @@
-import torch
-import h5py
 import os
+
+import h5py
+import torch
 
 from tvmc.models.RNN import PRNN
 
