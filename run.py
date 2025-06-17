@@ -8,6 +8,7 @@ from tvmc.utils.helper import setup_dir
 from tvmc.utils.training import reg_train
 from tvmc.utils.config import parse_config
 
+
 def run(config):
     model, config = build_model(config)
 
@@ -19,14 +20,13 @@ def run(config):
     output_path = setup_dir(config)
 
     print("Starting Training...")
-    reg_train(config, (model, optimizer), printf=True, output_path=output_path)
-    
+    reg_train(config, (model, optimizer), printf=True, output_path=output_path, resume=True)
+
     # Clean up after each run
     del model
     gc.collect()
     torch.cuda.empty_cache()
     torch.cuda.ipc_collect()
-
 
 
 if __name__ == "__main__":

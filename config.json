@@ -5,7 +5,7 @@
         "K": 256,
         "NLOOPS": 16,
         "steps": 20000,
-        "dir": "output",
+        "dir": "output/output",
         "lr": 5e-4,
         "sgrad": false,
         "true_grad": false,

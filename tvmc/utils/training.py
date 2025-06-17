@@ -11,7 +11,7 @@ from tvmc.utils.cuda_helper import DEVICE
 from tvmc.utils.helper import hdf5_writer, new_rnn_with_optim, setup_dir
 
 
-def reg_train(op, net_optim=None, printf=False, output_path=None):
+def reg_train(op, net_optim=None, printf=False, output_path=None, resume=False):
     try:
         print(op["HAMILTONIAN"])
         if op["HAMILTONIAN"]["name"] == "Rydberg":
@@ -23,6 +23,9 @@ def reg_train(op, net_optim=None, printf=False, output_path=None):
 
         if output_path is None:
             output_path = setup_dir(op)
+
+        checkpoint_path = os.path.join(output_path, "checkpoint.pt")
+        start_step = 0
 
         # Prepare queue for writing samples to disk
         sample_queue = mp.Queue()
@@ -41,6 +44,13 @@ def reg_train(op, net_optim=None, printf=False, output_path=None):
             net, optimizer = new_rnn_with_optim("GRU", op)
         else:
             net, optimizer = net_optim
+
+        if resume and os.path.exists(checkpoint_path):
+            print("Resuming from checkpoint...")
+            checkpoint = torch.load(checkpoint_path, map_location=DEVICE)
+            net.load_state_dict(checkpoint["model_state_dict"])
+            optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+            start_step = checkpoint["step"] + 1
 
         debug = []
         losses = []
@@ -65,7 +75,7 @@ def reg_train(op, net_optim=None, printf=False, output_path=None):
 
         t = time.time()
         print("Start Training")
-        for step in range(op["steps"]):
+        for step in range(start_step, op["steps"]):
             # gather samples and probabilities
             if op["Q"] != 1:
                 fill_batch()
@@ -138,9 +148,19 @@ def reg_train(op, net_optim=None, printf=False, output_path=None):
             if step % 10 == 0:
                 print(f"Step: {step}, Loss: {losses[-1]:.3f}")
                 if step % 100 == 0:
-                    print()
+                    print("Save checkpoint...")
+
                 if printf:
                     sys.stdout.flush()
+
+                torch.save(
+                    {
+                        "step": step,
+                        "model_state_dict": net.state_dict(),
+                        "optimizer_state_dict": optimizer.state_dict(),
+                    },
+                    checkpoint_path,
+                )
 
         DEBUG = np.array(debug)
 
@@ -151,7 +171,6 @@ def reg_train(op, net_optim=None, printf=False, output_path=None):
         # Signal writer process to stop
         sample_queue.put(None)
         writer_process.join()
-
 
     except KeyboardInterrupt:
         sample_queue.put(None)
