@@ -10,7 +10,7 @@ if __name__ == "__main__":
     _, config = parse_config(config_path)
     print(config)
 
-    system_sizes = [32 * 32, 40 * 40]
+    system_sizes = [4*4]
     for L in system_sizes:
         config["TRAIN"]["L"] = L
         config["LPTF"]["L"] = L
