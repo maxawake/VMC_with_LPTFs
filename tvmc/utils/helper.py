@@ -2,31 +2,46 @@ import os
 
 import h5py
 import torch
-
+import sys
 from tvmc.models.RNN import PRNN
 
 
+import signal
+
 def hdf5_writer(queue, file_path):
-    with h5py.File(file_path, "w") as f:
+    
+
+    f = h5py.File(file_path, "w")
+
+    def handler(signum, frame):
+        print(f"HDF5 writer caught signal {signum}. Closing file safely.")
+        f.flush()
+        f.close()
+        sys.exit(0)
+
+    # Register signal handlers
+    signal.signal(signal.SIGTERM, handler)
+    signal.signal(signal.SIGINT, handler)
+
+    try:
         while True:
             data = queue.get()
-            if data is None:  # Stop signal
+            if data is None:
                 break
 
             step, samplebatch, debug_dict = data
             step_key = f"step_{step:05d}"
 
-            # Create a group per step
             grp = f.create_group(step_key)
-
-            # Store sample
             grp.create_dataset("sample", data=samplebatch, dtype="uint8")
-
-            # Store each debug value separately
             for key, value in debug_dict.items():
                 grp.create_dataset(key, data=value)
 
-    print("HDF5 writer process finished.")
+    finally:
+        print("HDF5 writer process finishing, flushing and closing.")
+        f.flush()
+        f.close()
+
 
 
 def new_rnn_with_optim(rnntype, op, beta1=0.9, beta2=0.999):

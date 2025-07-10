@@ -1,5 +1,6 @@
 /PTF
 /RNN
+/results
 **/__pycache__
 *.h5
 /output*

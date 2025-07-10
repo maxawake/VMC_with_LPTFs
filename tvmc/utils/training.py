@@ -10,6 +10,18 @@ from tvmc.hamiltonians.ising import Ising
 from tvmc.utils.cuda_helper import DEVICE
 from tvmc.utils.helper import hdf5_writer, new_rnn_with_optim, setup_dir
 
+import signal
+
+stop_training = False
+
+def handle_sigterm(signum, frame):
+    global stop_training
+    print(f"Received signal {signum}. Preparing to terminate gracefully.")
+    stop_training = True
+
+# Register the signal handler
+signal.signal(signal.SIGTERM, handle_sigterm)
+signal.signal(signal.SIGINT, handle_sigterm)  # Optional: handle Ctrl+C similarly
 
 def reg_train(op, net_optim=None, printf=False, output_path=None, resume=False):
     try:
@@ -174,6 +186,34 @@ def reg_train(op, net_optim=None, printf=False, output_path=None, resume=False):
                     },
                     checkpoint_path,
                 )
+                
+            if stop_training:
+                print("Graceful termination requested. Saving checkpoint and exiting.")
+
+                # Save checkpoint safely
+                torch.save(
+                    {
+                        "step": step,
+                        "model_state_dict": net.state_dict(),
+                        "optimizer_state_dict": optimizer.state_dict(),
+                    },
+                    checkpoint_path,
+                )
+                print(f"Checkpoint saved at step {step}.")
+
+                # Signal hdf5_writer to close
+                sample_queue.put(None)
+                writer_process.join()
+                print("HDF5 writer closed.")
+
+                # Optionally save debug arrays if needed
+                DEBUG = np.array(debug)
+                if op["dir"] is not None:
+                    np.save(output_path + "/DEBUG", DEBUG)
+                    net.save(output_path + "/T")
+
+                print("Exiting gracefully due to SIGTERM.")
+                return DEBUG
 
         DEBUG = np.array(debug)
 

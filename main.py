@@ -15,5 +15,5 @@ if __name__ == "__main__":
         config["TRAIN"]["L"] = L
         config["LPTF"]["L"] = L
         config["TRAIN"]["NLOOPS"] = int(L / (2 * 2))
-        config["TRAIN"]["dir"] = f"output_{int(np.sqrt(L))}x{int(np.sqrt(L))}"
+        config["TRAIN"]["dir"] = os.path.join(config["TRAIN"]["dir"],f"output_{int(np.sqrt(L))}x{int(np.sqrt(L))}")
         run(config)
