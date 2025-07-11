@@ -65,6 +65,7 @@ class PRNN(Sampler):
 
         self.to(device)
 
+    @torch.jit.export
     def logprobability(self, input, h0=None):
         # type: (Tensor,Optional[Tensor]) -> Tensor
         """Compute the logscale probability of a given state
@@ -96,6 +97,7 @@ class PRNN(Sampler):
         logp = torch.sum(torch.log(total), dim=1)
         return logp
 
+    @torch.jit.export
     def sample(self, B, L, h0=None):
         # type: (int,int,Optional[Tensor]) -> Tuple[Tensor,Tensor]
         """Generates a set states
@@ -138,6 +140,7 @@ class PRNN(Sampler):
         # sample is repeated 16 times at 3rd index so we just take the first one
         return self.patch.reverse(input[:, 1:]).unsqueeze(-1), logp
 
+    @torch.jit.export
     def off_diag_labels(self, sample, nloops=1):
         # type: (Tensor,int) -> Tensor
         """label all of the flipped states  - set D as high as possible without it slowing down runtime

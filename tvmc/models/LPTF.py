@@ -95,6 +95,7 @@ class LPTF(Sampler):
         self.transformer.set_mask(L)
         self.pe.L = L
 
+    @torch.jit.export
     def logprobability(self, input):
         # type: (Tensor) -> Tensor # type: ignore
         """Compute the logscale probability of a given state
@@ -134,6 +135,7 @@ class LPTF(Sampler):
         logp = torch.sum(logsubsample, dim=0)
         return logp
 
+    @torch.jit.export
     def sample(self, B, L, cache=None):
         # type: (int,int,Optional[Tensor]) -> Tuple[Tensor,Tensor] # type: ignore
         """Generates a set states
@@ -173,6 +175,7 @@ class LPTF(Sampler):
         # Unpatch the samples
         return self.patch.reverse(input.transpose(1, 0)).unsqueeze(-1), logp
 
+    @torch.jit.export
     def off_diag_labels(self, sample, nloops=1):
         # type: (Tensor,int) -> Tensor # type: ignore
         """label all of the flipped states  - set D as high as possible without it slowing down runtime

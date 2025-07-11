@@ -21,6 +21,7 @@ class Sampler(nn.Module):
         """
         raise NotImplementedError
 
+    @torch.jit.export
     def sample(self, B, L):
         # type: (int,int) -> Tensor
         """Generates a set states
@@ -33,6 +34,7 @@ class Sampler(nn.Module):
         """
         raise NotImplementedError
 
+    @torch.jit.export
     def off_diag_labels(self, sample, nloops=1):
         # type: (Tensor,int) -> Tensor
         """
@@ -61,6 +63,7 @@ class Sampler(nn.Module):
 
         return probs.reshape([B, L])
 
+    @torch.jit.export
     def off_diag_labels_summed(self, sample, nloops=1):
         # type: (Tensor,int) -> Tuple[Tensor,Tensor]
         """
@@ -157,7 +160,7 @@ class Patch1D(nn.Module):
         # be chunks of size Ly//2
         return x.reshape([x.shape[0], self.L])
 
-
+@torch.jit.script
 def genpatch2onehot(patch, p):
     # type: (Tensor,int) -> Tensor
     """Turn a sequence of size p patches into a onehot vector

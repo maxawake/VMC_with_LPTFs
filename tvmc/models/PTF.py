@@ -300,6 +300,7 @@ class PTF(Sampler):
         self.transformer.set_mask(L)
         self.pe.L = L
 
+    @torch.jit.export
     def logprobability(self, input, h0=None):
         # type: (Tensor,Optional[Tensor]) -> Tensor
         """Compute the logscale probability of a given state
@@ -352,6 +353,7 @@ class PTF(Sampler):
         logp = torch.sum(torch.log(total), dim=0)
         return logp
 
+    @torch.jit.export
     def sample(self, B, L, h0=None):
         # type: (int,int,Optional[Tensor]) -> Tuple[Tensor,Tensor]
         """Generates a set states
@@ -415,6 +417,7 @@ class PTF(Sampler):
         # sample is repeated 16 times at 3rd index so we just take the first one
         return self.patch.reverse(input.transpose(1, 0)).unsqueeze(-1), logp
 
+    @torch.jit.export
     def off_diag_labels(self, sample, nloops=1):
         # type: (Tensor,int) -> Tensor
         """label all of the flipped states  - set D as high as possible without it slowing down runtime
