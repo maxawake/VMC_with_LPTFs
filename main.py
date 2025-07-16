@@ -9,11 +9,12 @@ if __name__ == "__main__":
     config_path = "config.json"
     _, config = parse_config(config_path)
     print(config)
+    base_path = config["TRAIN"]["dir"]
 
-    system_sizes = [4*4]
+    system_sizes = [4 * 4]
     for L in system_sizes:
         config["TRAIN"]["L"] = L
         config["LPTF"]["L"] = L
         config["TRAIN"]["NLOOPS"] = int(L / (2 * 2))
-        config["TRAIN"]["dir"] = os.path.join(config["TRAIN"]["dir"],f"output_{int(np.sqrt(L))}x{int(np.sqrt(L))}")
+        config["TRAIN"]["dir"] = os.path.join(base_path, f"output_{int(np.sqrt(L))}x{int(np.sqrt(L))}")
         run(config)
