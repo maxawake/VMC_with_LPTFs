@@ -46,7 +46,7 @@
     "HAMILTONIAN": {
         "name": "Rydberg",
         "V": 3.0,
-        "Omega": 1.0,
-        "delta": 2.0
+        "Omega": 7.5,
+        "delta": 0.0
     }
 }

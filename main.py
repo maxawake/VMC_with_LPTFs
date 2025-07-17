@@ -11,7 +11,7 @@ if __name__ == "__main__":
     print(config)
     base_path = config["TRAIN"]["dir"]
 
-    system_sizes = [4 * 4]
+    system_sizes = [12 * 12]
     for L in system_sizes:
         config["TRAIN"]["L"] = L
         config["LPTF"]["L"] = L
