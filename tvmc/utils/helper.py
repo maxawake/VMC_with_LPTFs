@@ -1,3 +1,4 @@
+from glob import glob
 import os
 
 import h5py
@@ -7,11 +8,12 @@ from tvmc.models.RNN import PRNN
 
 
 import signal
+import datetime
+import glob
+
 
 def hdf5_writer(queue, file_path):
-    
-
-    f = h5py.File(file_path, "w")
+    f = h5py.File(file_path, "a")
 
     def handler(signum, frame):
         print(f"HDF5 writer caught signal {signum}. Closing file safely.")
@@ -32,8 +34,13 @@ def hdf5_writer(queue, file_path):
             step, samplebatch, debug_dict = data
             step_key = f"step_{step:05d}"
 
+            # Create a group for the current step if it doesn't exist
             grp = f.create_group(step_key)
+
+            # Save the sample batch
             grp.create_dataset("sample", data=samplebatch, dtype="uint8")
+
+            # Save the debug information
             for key, value in debug_dict.items():
                 grp.create_dataset(key, data=value)
 
@@ -41,7 +48,6 @@ def hdf5_writer(queue, file_path):
         print("HDF5 writer process finishing, flushing and closing.")
         f.flush()
         f.close()
-
 
 
 def new_rnn_with_optim(rnntype, op, beta1=0.9, beta2=0.999):
@@ -69,26 +75,21 @@ def setup_dir(op_dict, resume=False):
 
     hname = op_dict["HAMILTONIAN"]["name"] if "HAMILTONIAN" in op_dict else "NA"
 
-    output_path = op["dir"] + "/%s/%d-B=%d-K=%d%s" % (hname, op["L"], op["B"], op["K"], op["sub_directory"])
+    output_path = os.path.join(op["dir"], hname)
 
     os.makedirs(output_path, exist_ok=True)
-    biggest = -1
-    for paths, folders, files in os.walk(output_path):
-        for f in folders:
-            try:
-                biggest = max(biggest, int(f))
-            except Exception as e:
-                print("Error in folder naming, please check your folder structure")
-                print("Error: ", e)
-                pass
 
     if resume:
-        number = str(biggest)
-    else:
-        number = str(biggest + 1)
-    output_path += "/" + number
+        timestamps = [path for path in glob.glob(os.path.join(output_path, "*"))]
+        timestamps.sort()
+        if timestamps:
+            output_path = timestamps[-1]
+            return output_path
+        else:
+            print("No previous runs found, starting fresh.")
 
+    output_path = os.path.join(output_path, datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
     os.makedirs(output_path, exist_ok=True)
 
-    print("Output folder path established")
+    print("Output folder path established at:", output_path)
     return output_path

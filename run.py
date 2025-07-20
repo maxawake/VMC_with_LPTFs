@@ -9,7 +9,7 @@ from tvmc.utils.training import reg_train
 from tvmc.utils.config import parse_config
 
 
-def run(config):
+def run(config, resume=False):
     model, config = build_model(config)
 
     # Initialize optimizer
@@ -18,7 +18,7 @@ def run(config):
     optimizer = torch.optim.Adam(model.parameters(), lr=config["TRAIN"]["lr"], betas=(beta1, beta2))
 
     print("Starting Training...")
-    reg_train(config, (model, optimizer), printf=True, resume=True)
+    reg_train(config, (model, optimizer), printf=True, resume=resume)
 
     # Clean up after each run
     del model

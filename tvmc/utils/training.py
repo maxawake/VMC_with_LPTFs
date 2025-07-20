@@ -9,45 +9,56 @@ from tvmc.hamiltonians.rydberg import Rydberg
 from tvmc.hamiltonians.ising import Ising
 from tvmc.utils.cuda_helper import DEVICE
 from tvmc.utils.helper import hdf5_writer, new_rnn_with_optim, setup_dir
+from tvmc.utils.config import save_config
 
 import signal
+from datetime import datetime, timedelta
 
-stop_training = False
+# Set the maximum duration
+MAX_DURATION = timedelta(days=6, hours=22)
+
 
 def handle_sigterm(signum, frame):
     global stop_training
     print(f"Received signal {signum}. Preparing to terminate gracefully.")
     stop_training = True
 
+
 # Register the signal handler
 signal.signal(signal.SIGTERM, handle_sigterm)
 signal.signal(signal.SIGINT, handle_sigterm)  # Optional: handle Ctrl+C similarly
 
-def reg_train(op, net_optim=None, printf=False, output_path=None, resume=False):
+
+def reg_train(config, net_optim=None, printf=False, output_path=None, resume=False):
     try:
-        print(op["HAMILTONIAN"])
-        if op["HAMILTONIAN"]["name"] == "Rydberg":
-            h = Rydberg(**op["HAMILTONIAN"])
-        elif op["HAMILTONIAN"]["name"] == "Ising":
-            h = Ising(**op["HAMILTONIAN"])
+        print(config["HAMILTONIAN"])
+        if config["HAMILTONIAN"]["name"] == "Rydberg":
+            h = Rydberg(**config["HAMILTONIAN"])
+        elif config["HAMILTONIAN"]["name"] == "Ising":
+            h = Ising(**config["HAMILTONIAN"])
         else:
             raise ValueError("Hamiltonian not implemented")
 
-        # Set up output directory and checkpoint path
-        output_path = setup_dir(op, resume=resume)
+        # Set up output directory
+        output_path = setup_dir(config, resume=resume)
+        save_config(config, output_path)
         checkpoint_path = os.path.join(output_path, "checkpoint.pt")
         start_step = 0
 
         # Prepare queue for writing samples to disk
         sample_queue = mp.Queue()
-        print(output_path)
         file_path = os.path.join(output_path, "samples.h5")
 
         # Start writer process
         writer_process = mp.Process(target=hdf5_writer, args=(sample_queue, file_path))
         writer_process.start()
 
-        op = op["TRAIN"]
+        # Record the start time
+        stop_training = False
+        start_time = datetime.now()
+
+        # Get the training options
+        op = config["TRAIN"]
 
         if op["true_grad"]:
             assert op["Q"] == 1
@@ -186,7 +197,12 @@ def reg_train(op, net_optim=None, printf=False, output_path=None, resume=False):
                     },
                     checkpoint_path,
                 )
-                
+
+            # Check if the elapsed time exceeds the limit
+            if datetime.now() - start_time > MAX_DURATION:
+                print("Maximum training duration exceeded. Stopping training.")
+                stop_training = True
+
             if stop_training:
                 print("Graceful termination requested. Saving checkpoint and exiting.")
 
@@ -212,7 +228,7 @@ def reg_train(op, net_optim=None, printf=False, output_path=None, resume=False):
                     np.save(output_path + "/DEBUG", DEBUG)
                     net.save(output_path + "/T")
 
-                print("Exiting gracefully due to SIGTERM.")
+                print("Exiting.")
                 return DEBUG
 
         DEBUG = np.array(debug)
