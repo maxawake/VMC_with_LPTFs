@@ -2,9 +2,9 @@
     "TRAIN": {
         "L": 256,
         "Q": 2,
-        "K": 256,
+        "K": 128,
         "NLOOPS": 16,
-        "steps": 2000,
+        "steps": 200,
         "dir": "results",
         "lr": 5e-4,
         "sgrad": false,
@@ -45,8 +45,8 @@
     },
     "HAMILTONIAN": {
         "name": "Rydberg",
-        "V": 3.0,
-        "Omega": 7.5,
-        "delta": 0.0
+        "V": 7.0,
+        "Omega": 1.0,
+        "delta": 1.2
     }
 }
