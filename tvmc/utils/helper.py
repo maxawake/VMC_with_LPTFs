@@ -1,15 +1,12 @@
-from glob import glob
+import datetime
+import glob
 import os
+from glob import glob
 
 import h5py
 import torch
-import sys
+
 from tvmc.models.RNN import PRNN
-
-
-import signal
-import datetime
-import glob
 
 
 def hdf5_writer(queue, file_path):

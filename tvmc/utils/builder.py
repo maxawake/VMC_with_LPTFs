@@ -1,9 +1,6 @@
+from tvmc.models.LPTF import LPTF
 from tvmc.models.PTF import PTF
 from tvmc.models.RNN import PRNN
-from tvmc.models.LPTF import LPTF
-import torch
-import random
-import numpy as np
 
 
 def build_model(config):
