@@ -151,7 +151,7 @@ def reg_train(config, net_optim=None, plot_queue=None, printf=False, output_path
 
             if plot_queue is not None:
                 if plot_queue.qsize() < 100:  # avoid memory bloat
-                    plot_queue.put(samplebatch.cpu().numpy())
+                    plot_queue.put({"samples": samplebatch.cpu().numpy(), "step": step, "stag_mag": stag_mag.item()})
 
             # update weights
             net.zero_grad()

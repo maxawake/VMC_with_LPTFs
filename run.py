@@ -33,7 +33,7 @@ if __name__ == "__main__":
     config_path = "./config.json"
     _, config = parse_config(config_path)
 
-    L = 16 * 16
+    L = 8 * 8
     config["TRAIN"]["L"] = L
     config["LPTF"]["L"] = L
     config["TRAIN"]["NLOOPS"] = int(L / (2 * 2))

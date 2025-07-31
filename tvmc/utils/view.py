@@ -20,7 +20,8 @@ class LivePlotWidget(QWidget):
 
         self.figure = Figure()
         self.canvas = FigureCanvas(self.figure)
-        self.ax = self.figure.add_subplot(111)
+        self.ax_sample = self.figure.add_subplot(211)
+        self.ax_stagmag = self.figure.add_subplot(212)
 
         self.toggle_button = QPushButton("Switch to Single Sample")
         self.sample_selector = QSpinBox()
@@ -40,6 +41,8 @@ class LivePlotWidget(QWidget):
 
         # Timer for refreshing
         self.timer = self.startTimer(200)
+        self.stag_steps = []
+        self.stag_mags = []
 
     def toggle_mode(self):
         if self.mode == "average":
@@ -53,24 +56,39 @@ class LivePlotWidget(QWidget):
     def timerEvent(self, event):
         try:
             while not self.plot_queue.empty():
-                batch = self.plot_queue.get_nowait()
-                self.plot_sample(batch)
+                data = self.plot_queue.get_nowait()
+                self.plot_sample(data["samples"])
+                self.update_staggered(data["step"], data["stag_mag"])
         except Exception as e:
             print("Plotting error:", e)
 
     def plot_sample(self, samplebatch):
-        self.ax.clear()
+        self.ax_sample.clear()
         if self.mode == "average":
             avg_sample = samplebatch.mean(axis=0)
             image = reshape_to_2d(avg_sample)
-            self.ax.imshow(image, cmap="viridis")
-            self.ax.set_title("Average Sample")
+            self.ax_sample.imshow(image, cmap="viridis")
+            self.ax_sample.set_title("Average Sample")
         else:
             idx = self.sample_selector.value()
             if 0 <= idx < samplebatch.shape[0]:
                 sample = reshape_to_2d(samplebatch[idx])
-                self.ax.imshow(sample, cmap="plasma")
-                self.ax.set_title(f"Sample ID: {idx}")
+                self.ax_sample.imshow(sample, cmap="plasma")
+                self.ax_sample.set_title(f"Sample ID: {idx}")
             else:
-                self.ax.text(0.5, 0.5, "Invalid Sample ID", ha="center")
+                self.ax_sample.text(0.5, 0.5, "Invalid Sample ID", ha="center")
+        self.canvas.draw()
+
+    def update_staggered(self, step, stag_mag):
+        self.stag_steps.append(step)
+        self.stag_mags.append(stag_mag)
+
+        self.ax_stagmag.clear()
+        self.ax_stagmag.plot(self.stag_steps, self.stag_mags, marker=None, linestyle="-")
+        self.ax_stagmag.hlines(0, 0, max(self.stag_steps), colors="black", linestyles="dashed")
+
+        self.ax_stagmag.set_ylabel("Staggered Magnetization")
+        self.ax_stagmag.set_xlabel("Training Step")
+        self.ax_stagmag.set_title("Staggered Magnetization vs Step")
+        self.ax_stagmag.grid(True)
         self.canvas.draw()
