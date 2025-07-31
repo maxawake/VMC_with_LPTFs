@@ -15,16 +15,6 @@ import glob
 def hdf5_writer(queue, file_path):
     f = h5py.File(file_path, "a")
 
-    def handler(signum, frame):
-        print(f"HDF5 writer caught signal {signum}. Closing file safely.")
-        f.flush()
-        f.close()
-        sys.exit(0)
-
-    # Register signal handlers
-    signal.signal(signal.SIGTERM, handler)
-    signal.signal(signal.SIGINT, handler)
-
     try:
         while True:
             data = queue.get()
