@@ -2,11 +2,11 @@
     "TRAIN": {
         "L": 256,
         "Q": 2,
-        "K": 128,
+        "K": 32,
         "NLOOPS": 16,
-        "steps": 200,
+        "steps": 1000,
         "dir": "results",
-        "lr": 5e-3,
+        "lr": 5e-4,
         "sgrad": false,
         "true_grad": false,
         "sub_directory": "2x2",
@@ -47,6 +47,6 @@
         "name": "Rydberg",
         "V": 7.0,
         "Omega": 1.0,
-        "delta": 0.1
+        "delta": 0.01
     }
 }
