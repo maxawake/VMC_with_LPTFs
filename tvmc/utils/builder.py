@@ -5,17 +5,18 @@ import torch
 import random
 import numpy as np
 
+
 def build_model(config):
     # === TRAIN CONFIG ===
     train_cfg = config["TRAIN"]
     L = train_cfg["L"]
-    seed = train_cfg.get("seed") or np.random.randint(65536)
+    # seed = train_cfg.get("seed") or np.random.randint(65536)
 
-    # Set seeds
-    torch.manual_seed(seed)
-    np.random.seed(seed)
-    random.seed(seed)
-    train_cfg["seed"] = seed
+    # # Set seeds
+    # torch.manual_seed(seed)
+    # np.random.seed(seed)
+    # random.seed(seed)
+    # train_cfg["seed"] = seed
 
     # Ensure batch size
     train_cfg["B"] = train_cfg["K"] * train_cfg["Q"]
@@ -65,7 +66,7 @@ def build_model(config):
             lptf_cfg["dropout"],
             lptf_cfg["num_layers"],
             lptf_cfg["nhead"],
-            lptf_cfg["full_seq"]
+            lptf_cfg["full_seq"],
         )
 
     else:
@@ -84,7 +85,7 @@ def build_model(config):
             model = PRNN(model_cfg["L"], model_cfg["patch"], model_cfg["rnntype"], model_cfg["Nh"])
         else:
             raise ValueError(f"Unknown model type: {model_type}")
-        
+
     config["TRAIN"] = train_cfg
 
     return model, config

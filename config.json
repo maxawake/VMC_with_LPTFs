@@ -6,7 +6,7 @@
         "NLOOPS": 16,
         "steps": 200,
         "dir": "results",
-        "lr": 5e-4,
+        "lr": 5e-3,
         "sgrad": false,
         "true_grad": false,
         "sub_directory": "2x2",
@@ -40,13 +40,13 @@
     },
     "HAMILTONIAN_": {
         "name": "Ising",
-        "h_x": 0.0,
-        "J": 1.0
+        "h_x": -0.1,
+        "J": 0.01
     },
     "HAMILTONIAN": {
         "name": "Rydberg",
         "V": 7.0,
         "Omega": 1.0,
-        "delta": 1.2
+        "delta": 0.1
     }
 }

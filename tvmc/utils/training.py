@@ -1,35 +1,23 @@
 import multiprocessing as mp
+import os
 import sys
 import time
-import os
+from datetime import datetime, timedelta
+
 import numpy as np
 import torch
 
-from tvmc.hamiltonians.rydberg import Rydberg
 from tvmc.hamiltonians.ising import Ising
+from tvmc.hamiltonians.rydberg import Rydberg
+from tvmc.utils.config import save_config
 from tvmc.utils.cuda_helper import DEVICE
 from tvmc.utils.helper import hdf5_writer, new_rnn_with_optim, setup_dir
-from tvmc.utils.config import save_config
-
-import signal
-from datetime import datetime, timedelta
 
 # Set the maximum duration
 MAX_DURATION = timedelta(days=6, hours=22)
 
 
-def handle_sigterm(signum, frame):
-    global stop_training
-    print(f"Received signal {signum}. Preparing to terminate gracefully.")
-    stop_training = True
-
-
-# Register the signal handler
-signal.signal(signal.SIGTERM, handle_sigterm)
-signal.signal(signal.SIGINT, handle_sigterm)  # Optional: handle Ctrl+C similarly
-
-
-def reg_train(config, net_optim=None, printf=False, output_path=None, resume=False):
+def reg_train(config, net_optim=None, plot_queue=None, printf=False, output_path=None, resume=False):
     try:
         print(config["HAMILTONIAN"])
         if config["HAMILTONIAN"]["name"] == "Rydberg":
@@ -161,6 +149,10 @@ def reg_train(config, net_optim=None, printf=False, output_path=None, resume=Fal
             # Send samples to HDF5 writer asynchronously
             sample_queue.put((step, samplebatch.cpu().numpy(), step_debug))
 
+            if plot_queue is not None:
+                if plot_queue.qsize() < 100:  # avoid memory bloat
+                    plot_queue.put(samplebatch.cpu().numpy())
+
             # update weights
             net.zero_grad()
             loss.backward()
@@ -204,7 +196,7 @@ def reg_train(config, net_optim=None, printf=False, output_path=None, resume=Fal
                 stop_training = True
 
             if stop_training:
-                print("Graceful termination requested. Saving checkpoint and exiting.")
+                print("Saving checkpoint and exiting.")
 
                 # Save checkpoint safely
                 torch.save(
@@ -229,7 +221,7 @@ def reg_train(config, net_optim=None, printf=False, output_path=None, resume=Fal
                     net.save(output_path + "/T")
 
                 print("Exiting.")
-                return DEBUG
+                sys.exit(0)
 
         DEBUG = np.array(debug)
 
@@ -248,4 +240,4 @@ def reg_train(config, net_optim=None, printf=False, output_path=None, resume=Fal
             DEBUG = np.array(debug)
             np.save(output_path + "/DEBUG", DEBUG)
             net.save(output_path + "/T")
-    return DEBUG
+        sys.exit(0)
