@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PyQt5.QtWidgets import QLabel, QPushButton, QSpinBox, QVBoxLayout, QWidget
+import matplotlib.pyplot as plt
 
 
 # Dummy 2D reshaper: reshape 1D sample to 2D (e.g., for plotting)
@@ -18,10 +19,11 @@ class LivePlotWidget(QWidget):
         self.plot_queue = plot_queue
         self.setWindowTitle("Live Sample Viewer")
 
-        self.figure = Figure()
+        # self.figure = Figure(figsize=(10, 10))
+        self.figure, ax = plt.subplots(1, 2, figsize=(10, 10))
         self.canvas = FigureCanvas(self.figure)
-        self.ax_sample = self.figure.add_subplot(211)
-        self.ax_stagmag = self.figure.add_subplot(212)
+        self.ax_sample = ax[0]
+        self.ax_stagmag = ax[1]
 
         self.toggle_button = QPushButton("Switch to Single Sample")
         self.sample_selector = QSpinBox()

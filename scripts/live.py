@@ -1,33 +1,11 @@
-import gc
 import multiprocessing as mp
 import sys
 
-import torch
 from PyQt5.QtWidgets import QApplication
 from threading import Thread
-from tvmc.utils.builder import build_model
 from tvmc.utils.config import parse_config
 from tvmc.utils.training import reg_train
 from tvmc.utils.view import LivePlotWidget
-
-
-def run(config, plot_queue=None, resume=False):
-    model, config = build_model(config)
-
-    # Initialize optimizer
-    beta1 = 0.9
-    beta2 = 0.999
-    optimizer = torch.optim.Adam(model.parameters(), lr=config["TRAIN"]["lr"], betas=(beta1, beta2))
-
-    print("Starting Training...")
-    reg_train(config, (model, optimizer), plot_queue=plot_queue, printf=True, resume=resume)
-
-    # Clean up after each run
-    del model
-    gc.collect()
-    torch.cuda.empty_cache()
-    torch.cuda.ipc_collect()
-
 
 if __name__ == "__main__":
     config_path = "./config.json"
@@ -44,7 +22,14 @@ if __name__ == "__main__":
 
     # Launch training in a thread
     def train():
-        run(config, plot_queue=plot_queue)
+        reg_train(
+            config,
+            plot_queue=plot_queue,
+            printf=True,
+            output_path=config["TRAIN"]["dir"],
+            start_time=None,  # No start time needed for live plotting
+            resume=False,
+        )
 
     # Start training in a separate process
     t = Thread(target=train)

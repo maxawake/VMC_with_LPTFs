@@ -1,3 +1,4 @@
+import gc
 import multiprocessing as mp
 import os
 import sys
@@ -9,16 +10,24 @@ import torch
 
 from tvmc.hamiltonians.ising import Ising
 from tvmc.hamiltonians.rydberg import Rydberg
+from tvmc.utils.builder import build_model
 from tvmc.utils.config import save_config
 from tvmc.utils.cuda_helper import DEVICE
-from tvmc.utils.helper import hdf5_writer, new_rnn_with_optim, setup_dir
+from tvmc.utils.helper import hdf5_writer, setup_dir
 
 # Set the maximum duration
 MAX_DURATION = timedelta(days=6, hours=22)
 
 
-def reg_train(config, net_optim=None, plot_queue=None, printf=False, output_path=None, resume=False):
+def reg_train(config, plot_queue=None, printf=False, output_path=None, start_time=None, resume=False):
     try:
+        net, config = build_model(config)
+
+        # Initialize optimizer
+        beta1 = 0.9
+        beta2 = 0.999
+        optimizer = torch.optim.Adam(net.parameters(), lr=config["TRAIN"]["lr"], betas=(beta1, beta2))
+
         print(config["HAMILTONIAN"])
         if config["HAMILTONIAN"]["name"] == "Rydberg":
             h = Rydberg(**config["HAMILTONIAN"])
@@ -43,18 +52,12 @@ def reg_train(config, net_optim=None, plot_queue=None, printf=False, output_path
 
         # Record the start time
         stop_training = False
-        start_time = datetime.now()
 
         # Get the training options
         op = config["TRAIN"]
 
         if op["true_grad"]:
             assert op["Q"] == 1
-
-        if net_optim is None:
-            net, optimizer = new_rnn_with_optim("GRU", op)
-        else:
-            net, optimizer = net_optim
 
         if resume and os.path.exists(checkpoint_path):
             print("Resuming from checkpoint...")
@@ -191,37 +194,34 @@ def reg_train(config, net_optim=None, plot_queue=None, printf=False, output_path
                 )
 
             # Check if the elapsed time exceeds the limit
-            if datetime.now() - start_time > MAX_DURATION:
-                print("Maximum training duration exceeded. Stopping training.")
-                stop_training = True
+            if start_time is not None:
+                if datetime.now() - start_time > MAX_DURATION:
+                    print("Saving checkpoint and exiting.")
 
-            if stop_training:
-                print("Saving checkpoint and exiting.")
+                    # Save checkpoint safely
+                    torch.save(
+                        {
+                            "step": step,
+                            "model_state_dict": net.state_dict(),
+                            "optimizer_state_dict": optimizer.state_dict(),
+                        },
+                        checkpoint_path,
+                    )
+                    print(f"Checkpoint saved at step {step}.")
 
-                # Save checkpoint safely
-                torch.save(
-                    {
-                        "step": step,
-                        "model_state_dict": net.state_dict(),
-                        "optimizer_state_dict": optimizer.state_dict(),
-                    },
-                    checkpoint_path,
-                )
-                print(f"Checkpoint saved at step {step}.")
+                    # Signal hdf5_writer to close
+                    sample_queue.put(None)
+                    writer_process.join()
+                    print("HDF5 writer closed.")
 
-                # Signal hdf5_writer to close
-                sample_queue.put(None)
-                writer_process.join()
-                print("HDF5 writer closed.")
+                    # Optionally save debug arrays if needed
+                    DEBUG = np.array(debug)
+                    if op["dir"] is not None:
+                        np.save(output_path + "/DEBUG", DEBUG)
+                        net.save(output_path + "/T")
 
-                # Optionally save debug arrays if needed
-                DEBUG = np.array(debug)
-                if op["dir"] is not None:
-                    np.save(output_path + "/DEBUG", DEBUG)
-                    net.save(output_path + "/T")
-
-                print("Exiting.")
-                sys.exit(0)
+                    print("Exiting.")
+                    sys.exit(0)
 
         DEBUG = np.array(debug)
 
