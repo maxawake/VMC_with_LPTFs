@@ -4,6 +4,7 @@ from tvmc.models.Base import Patch1D, Patch2D, Sampler
 from tvmc.models.PTF import PE1D, PE2D, FastMaskedTransformerEncoder
 from tvmc.utils.cuda_helper import DEVICE
 
+
 class LPTF(Sampler):
     """
     Sampler class which uses a transformer for long term information and a smaller subsampler for short term information
@@ -54,6 +55,7 @@ class LPTF(Sampler):
                                 by including --rnn or --ptf arguments.
     
     """
+
     def __init__(self, subsampler, L, patch, Nh, dropout, num_layers, nhead, full_seq, device=DEVICE, **kwargs):
         super(Sampler, self).__init__()
 
@@ -98,7 +100,7 @@ class LPTF(Sampler):
     def logprobability(self, input):
         # type: (Tensor) -> Tensor # type: ignore
         """Compute the logscale probability of a given state
-        Inputs:
+        Args:
             input - [B,L,1] matrix of zeros and ones for ground/excited states
         Returns:
             logp - [B] size vector of logscale probability labels
@@ -137,7 +139,7 @@ class LPTF(Sampler):
     def sample(self, B, L, cache=None):
         # type: (int,int,Optional[Tensor]) -> Tuple[Tensor,Tensor] # type: ignore
         """Generates a set states
-        Inputs:
+        Args:
             B (int)            - The number of states to generate in parallel
             L (int)            - The length of generated vectors
         Returns:
@@ -176,12 +178,12 @@ class LPTF(Sampler):
     def off_diag_labels(self, sample, nloops=1):
         # type: (Tensor,int) -> Tensor # type: ignore
         """label all of the flipped states  - set D as high as possible without it slowing down runtime
-        Parameters:
+        Args:
             sample - [B,L,1] matrix of zeros and ones for ground/excited states
             B,L (int) - batch size and sequence length
             D (int) - Number of partitions sequence-wise. We must have L%D==0 (D divides L)
 
-        Outputs:
+        Returns
 
             sample - same as input
             probs - [B,L] matrix of probabilities of states with the jth excitation flipped

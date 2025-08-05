@@ -3,6 +3,7 @@ from torch import nn
 
 from tvmc.utils.cuda_helper import DEVICE
 
+
 class Sampler(nn.Module):
     def __init__(self, device=DEVICE):
         self.device = device
@@ -14,7 +15,7 @@ class Sampler(nn.Module):
     def logprobability(self, input):
         # type: (Tensor) -> Tensor
         """Compute the logscale probability of a given state
-        Inputs:
+        Args:
             input - [B,L,1] matrix of zeros and ones for ground/excited states
         Returns:
             logp - [B] size vector of logscale probability labels
@@ -24,7 +25,7 @@ class Sampler(nn.Module):
     def sample(self, B, L):
         # type: (int,int) -> Tensor
         """Generates a set states
-        Inputs:
+        Args:
             B (int)            - The number of states to generate in parallel
             L (int)            - The length of generated vectors
         Returns:
@@ -36,7 +37,7 @@ class Sampler(nn.Module):
     def off_diag_labels(self, sample, nloops=1):
         # type: (Tensor,int) -> Tensor
         """
-        Inputs:
+        Args:
             samples  - [B,L,1] matrix of zeros and ones for ground/excited states
 
         Returns:
@@ -64,7 +65,7 @@ class Sampler(nn.Module):
     def off_diag_labels_summed(self, sample, nloops=1):
         # type: (Tensor,int) -> Tuple[Tensor,Tensor]
         """
-        Inputs:
+        Args:
             samples  - [B,L,1] matrix of zeros and ones for ground/excited states
 
         Returns:
@@ -161,7 +162,7 @@ class Patch1D(nn.Module):
 def genpatch2onehot(patch, p):
     # type: (Tensor,int) -> Tensor
     """Turn a sequence of size p patches into a onehot vector
-    Inputs:
+    Args:
         patch - Tensor of shape [?,p]
         p (int) - the patch size
 

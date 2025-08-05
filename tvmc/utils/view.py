@@ -5,8 +5,16 @@ from PyQt5.QtWidgets import QLabel, QPushButton, QSpinBox, QVBoxLayout, QWidget
 import matplotlib.pyplot as plt
 
 
-# Dummy 2D reshaper: reshape 1D sample to 2D (e.g., for plotting)
 def reshape_to_2d(sample):
+    """
+    Reshape a 1D sample to 2D (e.g., for plotting).
+
+    Args:
+        sample (np.ndarray): Input sample array.
+
+    Returns:
+        np.ndarray: Reshaped 2D array.
+    """
     length = sample.shape[-2]
     size = int(np.sqrt(length))
     return sample.reshape(size, size)
@@ -14,6 +22,8 @@ def reshape_to_2d(sample):
 
 # GUI class
 class LivePlotWidget(QWidget):
+    """Widget for live plotting of samples and staggered magnetization."""
+
     def __init__(self, plot_queue):
         super().__init__()
         self.plot_queue = plot_queue
@@ -47,6 +57,7 @@ class LivePlotWidget(QWidget):
         self.stag_mags = []
 
     def toggle_mode(self):
+        """Toggle between single sample and batch average mode."""
         if self.mode == "average":
             self.mode = "single"
             self.toggle_button.setText("Switch to Batch Average")
@@ -56,6 +67,10 @@ class LivePlotWidget(QWidget):
         self.mode_label.setText(f"Mode: {'Single Sample' if self.mode == 'single' else 'Batch Average'}")
 
     def timerEvent(self, event):
+        """Handle timer events to refresh the plot.
+        Args:
+            event: Timer event.
+        """
         try:
             while not self.plot_queue.empty():
                 data = self.plot_queue.get_nowait()
@@ -65,6 +80,10 @@ class LivePlotWidget(QWidget):
             print("Plotting error:", e)
 
     def plot_sample(self, samplebatch):
+        """Plot the sample batch.
+        Args:
+            samplebatch (np.ndarray): Batch of samples to plot.
+        """
         self.ax_sample.clear()
         if self.mode == "average":
             avg_sample = samplebatch.mean(axis=0)
@@ -82,6 +101,11 @@ class LivePlotWidget(QWidget):
         self.canvas.draw()
 
     def update_staggered(self, step, stag_mag):
+        """Update the staggered magnetization plot.
+        Args:
+            step (int): Current training step.
+            stag_mag (float): Current staggered magnetization value.
+        """
         self.stag_steps.append(step)
         self.stag_mags.append(stag_mag)
 

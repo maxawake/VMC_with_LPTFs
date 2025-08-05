@@ -3,6 +3,7 @@ import torch
 from tvmc.models.Base import Patch1D, Patch2D, Sampler, genpatch2onehot
 from tvmc.utils.cuda_helper import DEVICE
 
+
 class PRNN(Sampler):
     """
     Patched Recurrent Neural Network Implementation.
@@ -68,10 +69,10 @@ class PRNN(Sampler):
     def logprobability(self, input, h0=None):
         # type: (Tensor,Optional[Tensor]) -> Tensor
         """Compute the logscale probability of a given state
-        Inputs:
-            input - [B,L,1] matrix of zeros and ones for ground/excited states
+        Args:
+            input: [B,L,1] matrix of zeros and ones for ground/excited states
         Returns:
-            logp - [B] size vector of logscale probability labels
+            logp: [B] size vector of logscale probability labels
         """
 
         # shape is modified to [B,L//4,4]
@@ -99,9 +100,9 @@ class PRNN(Sampler):
     def sample(self, B, L, h0=None):
         # type: (int,int,Optional[Tensor]) -> Tuple[Tensor,Tensor]
         """Generates a set states
-        Inputs:
-            B (int)            - The number of states to generate in parallel
-            L (int)            - The length of generated vectors
+        Args:
+            B (int): The number of states to generate in parallel
+            L (int): The length of generated vectors
         Returns:
             samples - [B,L,1] matrix of zeros and ones for ground/excited states
         """
@@ -141,15 +142,14 @@ class PRNN(Sampler):
     def off_diag_labels(self, sample, nloops=1):
         # type: (Tensor,int) -> Tensor
         """label all of the flipped states  - set D as high as possible without it slowing down runtime
-        Parameters:
-            sample - [B,L,1] matrix of zeros and ones for ground/excited states
-            B,L (int) - batch size and sequence length
-            D (int) - Number of partitions sequence-wise. We must have L%D==0 (D divides L)
+        Args:
+            sample: [B,L,1] matrix of zeros and ones for ground/excited states
+            B,L (int): batch size and sequence length
+            D (int): Number of partitions sequence-wise. We must have L%D==0 (D divides L)
 
-        Outputs:
-
-            sample - same as input
-            probs - [B,L] matrix of probabilities of states with the jth excitation flipped
+        Returns:
+            sample: same as input
+            probs: [B,L] matrix of probabilities of states with the jth excitation flipped
         """
         D = nloops
         B, L, _ = sample.shape

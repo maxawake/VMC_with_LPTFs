@@ -4,6 +4,18 @@ from tvmc.models.RNN import PRNN
 
 
 def build_model(config):
+    """Build the model based on the provided configuration.
+
+    Args:
+        config (dict): Configuration dictionary.
+
+    Raises:
+        ValueError: If the model type is unknown.
+        ValueError: If the Hamiltonian is unknown.
+
+    Returns:
+        tuple: A tuple containing the model and the updated configuration.
+    """
     # === TRAIN CONFIG ===
     train_cfg = config["TRAIN"]
     L = train_cfg["L"]

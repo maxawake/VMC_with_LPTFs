@@ -20,6 +20,22 @@ MAX_DURATION = timedelta(days=6, hours=22)
 
 
 def reg_train(config, plot_queue=None, printf=False, output_path=None, start_time=None, resume=False):
+    """Regular training loop.
+
+    Args:
+        config (dict): Configuration dictionary.
+        plot_queue (mp.Queue, optional): Queue for plotting. Defaults to None.
+        printf (bool, optional): Whether to print progress. Defaults to False.
+        output_path (str, optional): Path to the output directory. Defaults to None.
+        start_time (datetime, optional): Start time of the training. Defaults to None.
+        resume (bool, optional): Whether to resume from a checkpoint. Defaults to False.
+
+    Raises:
+        ValueError: If the configuration is invalid.
+
+    Returns:
+        None
+    """
     try:
         net, config = build_model(config)
 

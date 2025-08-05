@@ -3,6 +3,7 @@ import torch
 from torch import nn
 from tvmc.utils.cuda_helper import DEVICE
 
+
 class Hamiltonian:
     def __init__(self, L, offDiag, device=DEVICE):
         self.offDiag = offDiag  # Off-diagonal interaction
@@ -15,7 +16,7 @@ class Hamiltonian:
         """Creates the matrix representation of the on-diagonal part of the hamiltonian
         - This should fill Vij with values"""
         raise NotImplementedError
-    
+
     def ground(self):
         """Returns the ground state energy E/L"""
         raise NotImplementedError
@@ -24,7 +25,7 @@ class Hamiltonian:
         """
         Takes in s, ln[p(s)] and exp(-logsqrtp)*sum(sqrt[p(s')]), then computes Hloc(s) for N samples s.
 
-        Inputs:
+        Args:
             samples  - [B,L,1] matrix of zeros and ones for ground/excited states
             logp     - size B vector of logscale probabilities ln[p(s)]
             logsqrtp - size B vector of average (log p)/2 values used for numerical stability
@@ -64,20 +65,19 @@ class Hamiltonian:
             abs_mag += torch.abs(torch.sum(samples_pm.squeeze(2), axis=1))
             sq_mag += torch.abs(torch.sum(samples_pm.squeeze(2), axis=1)) ** 2
 
-            samples_reshape = torch.reshape(
-                samples.squeeze(2), (B, int(np.sqrt(L)), int(np.sqrt(L)))
-            )
+            samples_reshape = torch.reshape(samples.squeeze(2), (B, int(np.sqrt(L)), int(np.sqrt(L))))
             for i in range(int(np.sqrt(L))):
                 for j in range(int(np.sqrt(L))):
                     stag_mag += (-1) ** (i + j) * (samples_reshape[:, i, j] - 0.5)
 
         return mag, abs_mag, sq_mag, stag_mag / L
 
+
 #    def localenergy(self,samples,logp,logppj):
 #        """
 #        Takes in s, ln[p(s)] and ln[p(s')] (for all s'), then computes Hloc(s) for N samples s.
 #
-#        Inputs:
+#        Args:
 #            samples - [B,L,1] matrix of zeros and ones for ground/excited states
 #            logp - size B vector of logscale probabilities ln[p(s)]
 #            logppj - [B,L] matrix of logscale probabilities ln[p(s')] where s'[i][j] had one state flipped at position j

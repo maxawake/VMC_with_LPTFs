@@ -30,7 +30,7 @@ class FastMaskedTransformerEncoder(torch.nn.Module):
         # type: (int)
         """
         Set the transformer mask for a sequence of length L
-        Inputs:
+        Args:
             L (int) - the desired sequence length
         """
         # take the log of a lower triangular matrix
@@ -39,9 +39,9 @@ class FastMaskedTransformerEncoder(torch.nn.Module):
     def forward(self, input):
         # type: (Tensor)->Tensor
         """Run the transformer on a sequence of length L
-        Inputs:
+        Args:
             input -  Tensor of shape [L,B,Nh]
-        Outputs:
+        Returns
             Tensor of shape [L,B,Nh]
         """
         return self.transformer(input, self.mask)
@@ -51,12 +51,12 @@ class FastMaskedTransformerEncoder(torch.nn.Module):
         """Efficiently calculates the next output of a transformer given the input sequence and
         cached intermediate layer encodings of the input sequence
 
-        Inputs:
+        Args:
             tgt - Tensor of shape [L,B,Nh]
             cache - Tensor of shape ?
             idx - index from which to start
 
-        Outputs:
+        Returns
             output - Tensor of shape [?,B,Nh]
             new_cache - Tensor of shape ?
         """
@@ -102,9 +102,9 @@ class FastMaskedTransformerEncoder(torch.nn.Module):
         # type: (Tensor) -> Tuple[Tensor,Tensor]
         """
         Equivalent to forward, but the intermediate outputs are also returned
-        Inputs:
+        Args:
             tgt - Tensor of shape [L,B,Nh]
-        Outputs:
+        Returns
             output - Tensor of shape [L,B,Nh]
             new_cache - Tensor of shape [?,L,B,Nh]
         """
@@ -155,9 +155,9 @@ class PE2D(torch.nn.Module):
     def forward(self, x):
         """
         Adds a 2D positional encoding of size d_model to x
-        Inputs:
+        Args:
             Tensor of shape [L,B,?]
-        Outputs:
+        Returns
             Tensor of shape [L,B,d_model]
         """
         if self.d_model % x.shape[-1] != 0:
@@ -191,9 +191,9 @@ class PE1D(torch.nn.Module):
     def forward(self, x):
         """
         Adds a 1D positional encoding of size d_model to x
-        Inputs:
+        Args:
             Tensor of shape [L,B,?]
-        Outputs:
+        Returns
             Tensor of shape [L,B,d_model]
         """
         if self.d_model % x.shape[-1] != 0:
@@ -236,7 +236,6 @@ class PTF(Sampler):
         repeat_pre (bool)    -- repeat the precondition instead of projecting it out
     """
 
-
     def __init__(self, L, patch, Nh, dropout, num_layers, nhead, repeat_pre, device=DEVICE, **kwargs):
         super(Sampler, self).__init__()
 
@@ -262,7 +261,7 @@ class PTF(Sampler):
         if type(Nh) is int:
             Nh = [Nh] * 4
         else:
-            Nh += [self.L * Nh[0]]# if _2D else [self.L * Nh[0]]
+            Nh += [self.L * Nh[0]]  # if _2D else [self.L * Nh[0]]
 
         self.device = device
 
@@ -293,8 +292,11 @@ class PTF(Sampler):
         self.to(device)
 
     def set_mask(self, L):
-        # type: (int)
-        """Initialize the self-attention mask"""
+        """Initialize the self-attention mask
+
+        Args:
+            L (int): The length of the input sequence
+        """
         # take the log of a lower triangular matrix
         self.L = L
         self.transformer.set_mask(L)
@@ -303,7 +305,7 @@ class PTF(Sampler):
     def logprobability(self, input, h0=None):
         # type: (Tensor,Optional[Tensor]) -> Tensor
         """Compute the logscale probability of a given state
-        Inputs:
+        Args:
             input - [B,L,1] matrix of zeros and ones for ground/excited states
         Returns:
             logp - [B] size vector of logscale probability labels
@@ -355,11 +357,11 @@ class PTF(Sampler):
     def sample(self, B, L, h0=None):
         # type: (int,int,Optional[Tensor]) -> Tuple[Tensor,Tensor]
         """Generates a set states
-        Inputs:
-            B (int)            - The number of states to generate in parallel
-            L (int)            - The length of generated vectors
+        Args:
+            B (int): The number of states to generate in parallel
+            L (int): The length of generated vectors
         Returns:
-            samples - [B,L,1] matrix of zeros and ones for ground/excited states
+            samples: [B,L,1] matrix of zeros and ones for ground/excited states
         """
         # length is divided by four due to patching
         L = L // self.p
@@ -418,15 +420,13 @@ class PTF(Sampler):
     def off_diag_labels(self, sample, nloops=1):
         # type: (Tensor,int) -> Tensor
         """label all of the flipped states  - set D as high as possible without it slowing down runtime
-        Parameters:
-            sample - [B,L,1] matrix of zeros and ones for ground/excited states
-            B,L (int) - batch size and sequence length
-            D (int) - Number of partitions sequence-wise. We must have L%D==0 (D divides L)
+        Args:
+            sample: [B,L,1] matrix of zeros and ones for ground/excited states
+            B,L (int): batch size and sequence length
+            D (int): Number of partitions sequence-wise. We must have L%D==0 (D divides L)
 
-        Outputs:
-
-            sample - same as input
-            probs - [B,L] matrix of probabilities of states with the jth excitation flipped
+        Returns:
+            tuple: (sample, probs),
         """
 
         D = nloops
